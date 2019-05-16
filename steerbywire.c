@@ -2,11 +2,7 @@
 #include <unistd.h>
 
 
- 
-FILE *openFileInput(){
-FILE *steerPunt;
-return steerPunt=fopen("steerIn.log","R");
-}
+
 FILE *openFileOutput(){
 FILE *steerPunt;
 return steerPunt=fopen("steer.log","w");
@@ -40,7 +36,7 @@ void Scrivi(int i,FILE *steerOu)
 void main()
 {
 	FILE *steerOu=openFileOutput();
-	FILE *steerIn=openFileInput();
+	
 	Scrivi(2,steerOu);
 	Scrivi(0,steerOu);
 	Scrivi(1,steerOu);
