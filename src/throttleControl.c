@@ -16,5 +16,6 @@ int main()
 {   
     FILE *fp = fopen("throttle.log", "w");
     accelera(15, fp);
+    printf("accelerazione completata");
     return 0;
 }
