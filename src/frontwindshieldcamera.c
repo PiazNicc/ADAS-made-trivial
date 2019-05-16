@@ -1,16 +1,21 @@
-nt length;
+  
+#include<stdio.h>
+#include <unistd.h>
+typedef struct String {
+char data[10];
+int length;
 }string;
 
  
 FILE *openFileInput(){
 FILE *wscPunt;
-wscPunt=0;
+wscPunt;
 return wscPunt=fopen("frontCamera.data","r");
 
 }
 FILE *openFileOutput(){
 FILE *wscPunt;
-wscPunt=0;
+wscPunt;
 return wscPunt=fopen("camera.log","w");
 }
 
@@ -35,20 +40,24 @@ void writeData(FILE *Punt,string data)
 
 }
 
+
 void main()
 {
 	FILE *wscIN=openFileInput();
 	FILE *wscOUT=openFileOutput();
-	for(int i=0;i<100;i++){
-	if(wscIN==0){
-	printf("error");}
+	string data;
+	if(wscIN==null){
+	printf("error not open fileINPUT");}
 	else{
-	string data=readData(wscIN);
-	if(wscOUT==0){
-	printf("error");}
+	 data=readData(wscIN);}
+	//invio file al server;
+	if(wscOUT==null){
+	printf("error not open fileOUTPUT");}
 	else
 	writeData(wscOUT,data);
-	}}
+	sleep(10);
+	
+
 }
 
 
