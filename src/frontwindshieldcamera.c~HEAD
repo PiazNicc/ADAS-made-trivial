@@ -1,4 +1,9 @@
-nt length;
+#include<stdio.h>
+#include<string.h>
+
+typedef struct String {
+char data[10];
+int length;
 }string;
 
  
@@ -50,6 +55,5 @@ void main()
 	writeData(wscOUT,data);
 	}}
 }
-
 
 
