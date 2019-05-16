@@ -37,7 +37,7 @@
 *.hex
 
 # Debug files
-*.dSYM/
+*.dSYM/fopen
 *.su
 *.idb
 *.pdb
@@ -51,8 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-
 *.json
 *.log
 
-throttle
+*.bin
