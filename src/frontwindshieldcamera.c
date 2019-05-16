@@ -3,40 +3,37 @@
 
 typedef struct String {
 char data[10];
-int length;
-}string;
+int length;}string;
 
  
 FILE *openFileInput(){
 FILE *wscPunt;
-wscPunt=0;
-return wscPunt=fopen("frontCamera.data","r");
-
+return wscPunt=fopen(" frontCamera.data","R");
 }
 FILE *openFileOutput(){
 FILE *wscPunt;
-wscPunt=0;
 return wscPunt=fopen("camera.log","w");
 }
 
 string readData(FILE *Punt)
 {
 	string Value;
-	char oneData='0';
-	Value.length=0;
-	while(!(oneData=='\n')){	
-	fread(&oneData,1,1,Punt);
-	Value.data[Value.length]=oneData;	
+	char oneData[2];
+	Value.length=0;	
+	do{	
+	fread(oneData,1,1,Punt);
+	Value.data[Value.length]=oneData[1];	
 	Value.length++;
+	
+	printf("%s",oneData);
 	}
-	Value.length=Value.length-2;
+	while(strcmp(oneData,"\n"));
 	return Value;
 }
-void writeData(FILE *Punt,string data)
+void writeData(FILE *Punt,char *data)
 {
-	
-	fwrite(&(data.data),1,data.length+1,Punt);
-	fwrite("\n",1,1,Punt);
+	fwrite(data,1,sizeof(data),Punt);
+
 
 }
 
@@ -44,16 +41,10 @@ void main()
 {
 	FILE *wscIN=openFileInput();
 	FILE *wscOUT=openFileOutput();
-	for(int i=0;i<100;i++){
-	if(wscIN==0){
-	printf("error");}
-	else{
-	string data=readData(wscIN);
-	if(wscOUT==0){
-	printf("error");}
-	else
-	writeData(wscOUT,data);
-	}}
+	string data;
+	data=readData(wscIN);
+	//writeData(wscOUT,data);
+	
 }
 
 
