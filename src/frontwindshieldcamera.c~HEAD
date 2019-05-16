@@ -1,6 +1,6 @@
-  
 #include<stdio.h>
-#include <unistd.h>
+#include<string.h>
+
 typedef struct String {
 char data[10];
 int length;
@@ -9,13 +9,13 @@ int length;
  
 FILE *openFileInput(){
 FILE *wscPunt;
-wscPunt;
+wscPunt=0;
 return wscPunt=fopen("frontCamera.data","r");
 
 }
 FILE *openFileOutput(){
 FILE *wscPunt;
-wscPunt;
+wscPunt=0;
 return wscPunt=fopen("camera.log","w");
 }
 
@@ -40,25 +40,20 @@ void writeData(FILE *Punt,string data)
 
 }
 
-
 void main()
 {
 	FILE *wscIN=openFileInput();
 	FILE *wscOUT=openFileOutput();
-	string data;
-	if(wscIN==null){
-	printf("error not open fileINPUT");}
+	for(int i=0;i<100;i++){
+	if(wscIN==0){
+	printf("error");}
 	else{
-	 data=readData(wscIN);}
-	//invio file al server;
-	if(wscOUT==null){
-	printf("error not open fileOUTPUT");}
+	string data=readData(wscIN);
+	if(wscOUT==0){
+	printf("error");}
 	else
 	writeData(wscOUT,data);
-	sleep(10);
-	
-
+	}}
 }
-
 
 

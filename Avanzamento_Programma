@@ -1,0 +1,10 @@
+-Componente HMI=  DA INIZIARE
+-Componente steer-by-wire= add-comunication-HMI
+-Componente throttle control=?
+-Componente brake-by-wire=?
+-Componente front windshield camera=add-comunication-HMI
+-Componente forward facing radar (facoltativo)=DA INIZIARE
+-Componente park assist=DA INIZIARE
+-Componente surround view cameras (facoltativo)=DA INIZIARE
+-Componente blind spot (facoltativo)=DA INIZIARE
+-Componente Central ECU=DA INIZIARE
