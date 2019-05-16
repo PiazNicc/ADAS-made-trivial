@@ -13,9 +13,9 @@ void accelera(int a, FILE *fd)
     }
 }
 int main()
-{   
+{
     FILE *fp = fopen("throttle.log", "w");
     accelera(15, fp);
-    
+
     return 0;
 }
