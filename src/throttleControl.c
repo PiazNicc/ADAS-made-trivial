@@ -6,7 +6,7 @@ void accelera(int a, FILE *fd)
 {
     int len = strlen("aumento 5\n");
     while (a > 0)
-    {
+    {   
         fwrite("aumento 5\n", 1, len, fd);
         sleep(1);
         a -= 5;

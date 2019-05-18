@@ -1,6 +1,7 @@
-  
+#include<stdlib.h>
 #include<stdio.h>
 #include <unistd.h>
+
 typedef struct String {
 char data[10];
 int length;
