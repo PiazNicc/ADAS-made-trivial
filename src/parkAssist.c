@@ -12,15 +12,14 @@ int main(int argc, char *argv[])
             exit(-1);
             /* code */
 	}
-	int n = 0;
-      while(fread(data,1,4,p)!=NULL && n<10) {
+	int n=0;
+	while(fread(data,1,4,p)==4 && n<10) {
      	
-	puts(data);
+		puts(data);
 	//printf("%d",sizeof(data));
-         fwrite(data, sizeof(char),sizeof(data),log);
-	 n=n+1;
+		fwrite(data,1,sizeof(data),log);
 	//prova con 10 termini
-
+		n=n+1;
 	//sleep(1); 
 
    }
