@@ -1,4 +1,4 @@
-#include <stdio.h>-/
+#include <stdio.h>
 #include <errno.h>
 
 int main(int argc, char *argv[])
@@ -6,24 +6,26 @@ int main(int argc, char *argv[])
     FILE *p = fopen("/dev/urandom", "r");
     FILE *log = fopen("assist.log", "w");
     char data[4];
-    while (1)
-    {
-
-        if (p == NULL || log == NULL)
+	 if (p == NULL || log == NULL)
         {
             perror("errore in apertura file");
             exit(-1);
             /* code */
-        }
-        else
-        {
-           int n = fread(data, 1, 4, p);
+	}
+	int n = 0;
+      while(fread(data,1,4,p)!=NULL && n<10) {
+     	
+	puts(data);
+	//printf("%d",sizeof(data));
+         fwrite(data, sizeof(char),sizeof(data),log);
+	 n=n+1;
+	//prova con 10 termini
 
-            fwrite(data, 1, n, log);
-            sleep(1);
+	//sleep(1); 
 
-            /* code */
-        }
-    }
-    exit(0);
+   }
+   fclose(log);
+   fclose(p);
+    
+    //exit(0);
 }
