@@ -14,10 +14,11 @@ int main(int argc, char *argv[])
 	}
 	int n=0;
 	while(fread(data,1,4,p)==4 && n<10) {
-     	
-		puts(data);
-	//printf("%d",sizeof(data));
-		fwrite(data,1,sizeof(data),log);
+		int c= atoi(data);
+		printf("%d",c);
+		//fwrite(&c,sizeof(int),1, log);
+		fprintf(log, "%d",c);
+
 	//prova con 10 termini
 		n=n+1;
 	//sleep(1); 
