@@ -1,5 +1,5 @@
 #!/bin/bash
 
-x-terminal-emulator -e ./in.out
+x-terminal-emulator -e $(pwd)/in.out
 
-./out.out
+$(pwd)/out.out
