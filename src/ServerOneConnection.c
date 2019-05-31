@@ -34,12 +34,12 @@ int make_connection (char *name) {
   strcpy (serverUNIXAddress.sun_path, name); /* Set name */
   unlink (name); /* Remove file if it already exists */
   bind (serverFd, serverSockAddrPtr, serverLen);/*Create file*/
-  listen (serverFd, 1); /* Maximum pending connection length */
+ //listen (serverFd, 1); forse meglio tenere listen separato?
   return serverFd;
 }
 
 int make_socket(int serverFd)
-{
+{ //secondo me ha piu senso lasciare la gestione degli accept ai server direttamente
 	int i=0, clientFd=-1, clientLen;
 	struct sockaddr_un clientUNIXAddress; /*Client address */
 	struct sockaddr* clientSockAddrPtr;/*Ptr to client address*/

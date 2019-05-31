@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include "ServerOneConnection.h"
 
 void throttleLog(int a, FILE *fd)
 {
@@ -22,21 +23,19 @@ void throttleLog(int a, FILE *fd)
 }
 int main()
 {
-    FILE *fp = fopen("throttle.log", "a");
+    FILE *fp;
     char message[10];
-    message[10] = '\0';
-    int serverD, ECUclientD, serverLen, ClientLen, amount, nextP;
+    int serverD, ECUclientD,ClientLen, amount;
     struct sockaddr_un serverAddr, ecuAddr;
     //inizializzo socket
-    serverLen = sizeof(serverAddr);
-    ClientLen = sizeof(ecuAddr);
+    /* serverLen = sizeof(serverAddr);
     unlink("throttle");
     serverD = socket(AF_UNIX, SOCK_STREAM, 0);
     if (serverD < 0)
     {
         perror("problema nella creazione del canale");
         exit(-1);
-        /* code */
+        
     }
 
     serverAddr.sun_family = AF_UNIX;
@@ -45,11 +44,13 @@ int main()
     {
         perror("errore nella connessione");
         exit(-2);
-    }
+    }*/
+    ClientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
+    serverD = make_connection("throttle");
     listen(serverD, 5);
     while (1)
-    {
+    { //DA RISCRIVERE CICLO INTERNO PER PERMETTERE TIMEOUT
         fp = fopen("throttle.log", "a");
         ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &ClientLen);
         recv(ECUclientD, message, sizeof(message), 0);
