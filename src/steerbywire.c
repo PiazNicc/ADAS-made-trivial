@@ -50,7 +50,7 @@ void main()
 	listen(serverD, 5);
 	while (1)
 	{
-		ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, ClientLen);
+		ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, clientLen);
 		//passa il comando
 	}
 }
