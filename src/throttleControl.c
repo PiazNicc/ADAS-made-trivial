@@ -39,34 +39,22 @@ int main()
     int serverD, ECUclientD, ClientLen, amount;
     struct sockaddr_un ecuAddr;
     //inizializzo socket
-    /* serverLen = sizeof(serverAddr);
-    unlink("throttle");
-    serverD = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (serverD < 0)
-    {
-        perror("problema nella creazione del canale");
-        exit(-1);
-        
-    }
 
-    serverAddr.sun_family = AF_UNIX;
-    strcpy(serverAddr.sun_path, "throttle");
-    if (bind(serverD, (struct sockaddr *)&serverAddr, serverLen) < 0)
-    {
-        perror("errore nella connessione");
-        exit(-2);
-    }*/
     ClientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
     serverD = make_connection("throttle");
-    if (fork() == 0)
+    //figlio continua  a loggare mentre padre aspetta richieste di accelerazione
+    int child = fork();
+    if (child < 0)
+    {
+        perror("errore creazione processo");
+    }
+    else if (child == 0)
     {
         while (1)
         {
             throttleLog(0);
         }
-
-        /* code */
     }
     else
     {
