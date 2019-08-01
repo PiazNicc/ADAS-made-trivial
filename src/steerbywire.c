@@ -18,6 +18,7 @@ FILE *openFileOutput()
 void Scrivi(int i, FILE *steerOu)
 {
 
+
 	char *ma[] = {"STO GIRANDO A DESTRA", "STO GIRANDO A SINISTRA", "NO ACTION"};
 	int maLenght[] = {20, 22, 9};
 

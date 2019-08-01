@@ -7,7 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "ServerOneConnection.h"
+#include <errno.h>
+#include <sys/time.h>
+#include "SocketConnection.h"
 
 void throttleLog(int a)
 {
@@ -20,6 +22,7 @@ void throttleLog(int a)
         {
             perror("impossibile scrivere");
         }
+        sleep(1);
     }
     while (a > 0)
     {
@@ -29,41 +32,50 @@ void throttleLog(int a)
         };
         a -= 5;
     }
-    sleep(1);
+
     fclose(fd);
 }
 int main()
 {
 
     char message[10];
-    int serverD, ECUclientD, ClientLen, amount;
+    int serverD, ECUclientD, ClientLen, amount, inp;
     struct sockaddr_un ecuAddr;
+    struct timeval timeout;
+    fd_set set;
+    FD_ZERO(&set);
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
     //inizializzo socket
 
     ClientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
-    serverD = make_connection("throttle");
-    //figlio continua  a loggare mentre padre aspetta richieste di accelerazione
-    int child = fork();
-    if (child < 0)
+    serverD = serverSocket("throttle",1);
+    FD_SET(serverD, &set);
+    listen(serverD, 5);
+    while (1)
     {
-        perror("errore creazione processo");
-    }
-    else if (child == 0)
-    {
-        while (1)
+        //DA RISCRIVERE CICLO INTERNO PER PERMETTERE TIMEOUT
+        inp = select(FD_SETSIZE, &set, NULL, NULL, &timeout);
+
+        if (inp < 0)
+        {
+            perror("errore di connessione");
+            exit(EXIT_FAILURE);
+        }
+        else if (inp == 0)
         {
             throttleLog(0);
         }
-    }
-    else
-    {
-        listen(serverD, 5);
-        while (1)
+        else
         {
-            //DA RISCRIVERE CICLO INTERNO PER PERMETTERE TIMEOUT
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &ClientLen);
-            recv(ECUclientD, message, sizeof(message), 0);
+            if(ECUclientD < 0 ){
+                fprintf(stderr,"impossibile connettersi");
+            }
+            if(recv(ECUclientD, message, strlen(message),0) < 0){
+                fprintf(stderr,"impossibile leggere");
+            }
             amount = atoi(message);
             throttleLog(amount);
             close(ECUclientD);

@@ -7,8 +7,7 @@
 #include <sys/socket.h>
 #include <sys/un.h> /* For AFUNIX sockets */
 #include "SocketConnection.h"
-#define CLIENT 0
-#define SERVER 1
+#define DEFAULT 0
 
 int writeToSocket(int fd, char *line1)
 {
@@ -35,19 +34,10 @@ int make_socket(char *name, int mode)
   struct sockaddr *sockAddrPtr;       /*Ptr to server address*/
   sockAddrPtr = (struct sockaddr *)&sockUNIXAddress;
   socketLen = sizeof(sockUNIXAddress);
-  socketFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  socketFd = socket(AF_UNIX, SOCK_STREAM, DEFAULT);
   sockUNIXAddress.sun_family = AF_UNIX;   /* Set domain type */
   strcpy(sockUNIXAddress.sun_path, name); /* Set name */
-  if (mode == SERVER)
-  {
-    unlink(name);                           /* Remove file if it already exists */
-    bind(socketFd, sockAddrPtr, socketLen); /*Create file*/
-  }
-  else if (mode != CLIENT)
-  {
-    perror("errore");
-    exit(EXIT_FAILURE);
-  }
-
+  unlink(name);                           /* Remove file if it already exists */
+  bind(socketFd, sockAddrPtr, socketLen); /*Create file*/
   return socketFd;
 }
