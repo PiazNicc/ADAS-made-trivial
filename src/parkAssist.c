@@ -24,10 +24,10 @@ for (int secs = 0; secs < 30; secs++)
         fprintf(log,"%d ",rng);
 	}
 	fprintf(log,"\n");
-	sleep(1)
+	sleep(1);
 
 }
-}
+
 	
 	
 	fclose(log);

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "ServerOneConnection.h"
+#include "SocketConnection.h"
 
 FILE *openFileOutput()
 {
@@ -47,7 +47,7 @@ void main()
 	struct sockaddr_un ecuAddr;
 	clientLen = sizeof(ecuAddr);
 	printf("in attesa...\n");
-	serverD = make_connection("steer");
+	serverD = serverSocket("steer");
 	listen(serverD, 5);
 	while (1)
 	{

@@ -45,7 +45,7 @@ int main()
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/time.h>
-#include "ServerOneConnection.h"
+#include "SocketConnection.h"
 
 int main()
 {
