@@ -27,7 +27,7 @@ int readLineFromSocket(int fd, char *str)
   return (n > 0);
 } /* Return false if end-of-input */
 
-int serverSocket(unsigned char *name, int mode)
+int serverSocket(unsigned char *name)
 {
   int socketFd, socketLen;
   struct sockaddr_un sockUNIXAddress; /*Server address */
