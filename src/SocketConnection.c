@@ -27,7 +27,7 @@ int readLineFromSocket(int fd, char *str)
   return (n > 0);
 } /* Return false if end-of-input */
 
-int serverSocket(char *name, int mode)
+int serverSocket(unsigned char *name, int mode)
 {
   int socketFd, socketLen;
   struct sockaddr_un sockUNIXAddress; /*Server address */
@@ -40,4 +40,25 @@ int serverSocket(char *name, int mode)
   unlink(name);                           /* Remove file if it already exists */
   bind(socketFd, sockAddrPtr, socketLen); /*Create file*/
   return socketFd;
+}
+
+int connectToServer(unsigned char *serverName)
+{
+  int clientFd, serverLen, result;
+  struct sockaddr_un serverAddr;
+  //inizializzo socket
+  serverLen = sizeof(serverAddr);
+  clientFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  serverAddr.sun_family = AF_UNIX;
+  strcpy(serverAddr.sun_path, serverName);
+  do
+  {
+    result = connect(clientFd, (struct sockaddr *)&serverAddr, serverLen);
+    if (result == -1)
+    {
+      printf("impossibile connetersi,nuovo tentativo in 1 secondo\n");
+      sleep(1); /* Wait and then try again */
+    }
+  } while (result == -1);
+  return clientFd;
 }
