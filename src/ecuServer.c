@@ -16,6 +16,7 @@ int ecuServer()
     char *command;
     int speed = 0, serverD, clientD;
     struct sockaddr_un client;
+    //genera processi attuatori
     serverD = serverSocket("ecu");
     listen(serverD, 5);
     while (1)
