@@ -50,7 +50,7 @@ int main()
 
     ClientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
-    serverD = serverSocket("throttle",1);
+    serverD = serverSocket("throttle");
     FD_SET(serverD, &set);
     listen(serverD, 5);
     while (1)

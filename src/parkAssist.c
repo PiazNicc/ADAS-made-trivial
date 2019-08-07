@@ -7,35 +7,30 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include "SocketConnection.h"
-int main()
-{ // di base fa questo,va migliorato e testato
+void parkAssist()
+{ //dovrebbe essere ok
 	FILE *p = fopen("/dev/urandom", "r");
-	FILE *log = fopen("assist.log", "a");
-	int data[4];
-	int rng = 0, charCount = 0;
-	int ecuServer;
-	
-	if (p == NULL || log == NULL)
+	FILE *log = fopen("assist.log", "w");
+	int data, len = sizeof(data), ecuServer;
+	unsigned int rng = 0;
+	if (p == NULL  || log == NULL)
 	{
 		perror("errore in apertura file");
+		exit(EXIT_FAILURE);
 
-		/* code */
+	
 	}
 	for (int secs = 0; secs < 30; secs++)
 	{
-
-		for (int i = 0; i < 4; i++)
-		{
-			rng = getc(p); /* code */
-			data[i] = rng;
-			charCount += fprintf(log, "%d ", rng);
-		}
-		ecuServer = connectToServer("ecu");
-		send(ecuServer, data, sizeof(data), 0);
+//gestione errori da fare
+		rng = getc(p);//devo leggere 4 byte quindi uso un int che è delle stesse dimensioni 
+		data = rng;
+		fprintf(log, "%02x", rng);
+		ecuServer = connectToServer("park");
+		send(ecuServer, &data, len, 0);
 		fprintf(log, "\n");
 		sleep(1);
 	}
 	fclose(log);
 	fclose(p);
-	return charCount;
 }

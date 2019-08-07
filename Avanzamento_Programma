@@ -1,10 +1,10 @@
 -Componente HMI=funzionamento base ok,da completare e integrare(HMIoutput completato e funzionante,Hmi input schema base ok da decidere versione da utilizzare)
 -Componente steer-by-wire= add-comunication-HMI
--Componente throttle control=iniziata,da completare
--Componente brake-by-wire=iniziata,da completare
+-Componente throttle control=da implementare timeout e log "no action"
+-Componente brake-by-wire=da implementare timeout e log "no action"
 -Componente front windshield camera=add-comunication-HMI
 -Componente forward facing radar (facoltativo)=DA INIZIARE
--Componente park assist=iniziata,da completare
+-Componente park assist=dovrebbe essere ok
 -Componente surround view cameras (facoltativo)=DA INIZIARE
 -Componente blind spot (facoltativo)=DA INIZIARE
--Componente Central ECU=DA INIZIARE
+-Componente Central ECU=iniziato ecuServer,da iniziare ecuCLient
