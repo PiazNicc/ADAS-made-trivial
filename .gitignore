@@ -56,3 +56,6 @@ dkms.conf
 
 *.bin
 .vscode*
+src/throttle
+src/park
+.genProc.c.swp
