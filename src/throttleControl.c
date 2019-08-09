@@ -41,45 +41,25 @@ int main()
     char message[10];
     int serverD, ECUclientD, ClientLen, amount, inp;
     struct sockaddr_un ecuAddr;
-    struct timeval timeout;
-    fd_set set;
-    FD_ZERO(&set);
-    timeout.tv_sec = 1;
-    timeout.tv_usec = 0;
-    //inizializzo socket
-
     ClientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
     serverD = serverSocket("throttle");
-    FD_SET(serverD, &set);
     listen(serverD, 5);
     while (1)
     {
         //DA RISCRIVERE CICLO INTERNO PER PERMETTERE TIMEOUT
-        inp = select(FD_SETSIZE, &set, NULL, NULL, &timeout);
-
-        if (inp < 0)
+        ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &ClientLen);
+        if (ECUclientD < 0)
         {
-            perror("errore di connessione");
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "impossibile connettersi");
         }
-        else if (inp == 0)
+        if (recv(ECUclientD, message, strlen(message), 0) < 0)
         {
-            throttleLog(0);
+            fprintf(stderr, "impossibile leggere");
         }
-        else
-        {
-            ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &ClientLen);
-            if(ECUclientD < 0 ){
-                fprintf(stderr,"impossibile connettersi");
-            }
-            if(recv(ECUclientD, message, strlen(message),0) < 0){
-                fprintf(stderr,"impossibile leggere");
-            }
-            amount = atoi(message);
-            throttleLog(amount);
-            close(ECUclientD);
-        }
+        amount = atoi(message);
+        throttleLog(amount);
+        close(ECUclientD);
     }
 
     return 0;
