@@ -29,16 +29,13 @@ void steerLog(unsigned char *message)
 {
 	FILE *steerPunt;
 
-	char *ma[] = {"STO GIRANDO A DESTRA\n", "STO GIRANDO A SINISTRA\n", "NO ACTION\n"};
-	int maLenght[] = {20, 22, 9};
-
 	int k;
 	if (strcmp(message, "DESTRA") == 0 || strcmp(message, "SINISTRA") == 0)
 	{
 		for (int j = 0; j < 4; j++)
 		{
 			steerPunt = fopen("steer.log", "a");
-			fprintf(steerPunt,"STO GIRANDO A %s\n",message);
+			fprintf(steerPunt, "STO GIRANDO A %s\n", message);
 			fclose(steerPunt);
 			sleep(1);
 		}
@@ -46,7 +43,7 @@ void steerLog(unsigned char *message)
 	else
 	{
 		steerPunt = fopen("steer.log", "a");
-		fprintf(steerPunt,"%s\n",message);
+		fprintf(steerPunt, "%s\n", message);
 		fclose(steerPunt);
 		sleep(1);
 	}
@@ -55,7 +52,7 @@ void steerLog(unsigned char *message)
 void main()
 {
 	char message[15];
-	memset(message,0,sizeof(message));
+	memset(message, 0, sizeof(message));
 	FILE *f = fopen("steer.log", "w");
 	fprintf(f, __DATE__);
 	fclose(f);
@@ -103,6 +100,4 @@ void main()
 			close(ECUclientD);
 		}
 	}
-
-
 }
