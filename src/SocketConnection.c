@@ -47,6 +47,7 @@ int connectToServer(unsigned char *serverName)
   int clientFd, serverLen, result;
   struct sockaddr_un serverAddr;
   //inizializzo socket
+  memset(&serverAddr,0,sizeof(serverAddr));
   serverLen = sizeof(serverAddr);
   clientFd = socket(AF_UNIX, SOCK_STREAM, 0);
   serverAddr.sun_family = AF_UNIX;
