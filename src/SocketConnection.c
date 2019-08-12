@@ -56,7 +56,7 @@ int connectToServer(unsigned char *serverName)
     result = connect(clientFd, (struct sockaddr *)&serverAddr, serverLen);
     if (result == -1)
     {
-      printf("impossibile connetersi,nuovo tentativo in 1 secondo\n");
+      printf("impossibile connettersi,nuovo tentativo in 1 secondo\n");
       sleep(1); /* Wait and then try again */
     }
   } while (result == -1);
