@@ -54,7 +54,8 @@ void steerLog(unsigned char *message)
 
 void main()
 {
-	char message[8];
+	char message[15];
+	memset(message,0,sizeof(message));
 	FILE *f = fopen("steer.log", "w");
 	fprintf(f, __DATE__);
 	fclose(f);
