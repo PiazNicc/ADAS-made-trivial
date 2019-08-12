@@ -7,51 +7,101 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <signal.h>
 #include "SocketConnection.h"
-
+int flag = 0;
+void flagHandle(int sig)
+{
+	flag = (flag + 1) % 2;
+}
+void handler(int sig)
+{
+	kill(0, SIGINT);
+	exit(EXIT_SUCCESS);
+}
 FILE *openFileOutput()
 {
 	FILE *steerPunt;
 	return steerPunt = fopen("steer.log", "w");
 }
 
-void Scrivi(int i, FILE *steerOu)
+void steerLog(unsigned char *message)
 {
+	FILE *steerPunt;
 
-
-	char *ma[] = {"STO GIRANDO A DESTRA", "STO GIRANDO A SINISTRA", "NO ACTION"};
+	char *ma[] = {"STO GIRANDO A DESTRA\n", "STO GIRANDO A SINISTRA\n", "NO ACTION\n"};
 	int maLenght[] = {20, 22, 9};
 
 	int k;
-	if (i != 2)
+	if (strcmp(message, "DESTRA") == 0 || strcmp(message, "SINISTRA") == 0)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-
-			k = fwrite(ma[i], 1, maLenght[i], steerOu);
-			fwrite("\n", 1, 1, steerOu);
+			steerPunt = fopen("steer.log", "a");
+			fprintf(steerPunt,"STO GIRANDO A %s\n",message);
+			fclose(steerPunt);
 			sleep(1);
 		}
 	}
 	else
 	{
-		k = fwrite(ma[i], 1, maLenght[i], steerOu);
-		fwrite("\n", 1, 1, steerOu);
+		steerPunt = fopen("steer.log", "a");
+		fprintf(steerPunt,"%s\n",message);
+		fclose(steerPunt);
+		sleep(1);
 	}
 }
 
 void main()
 {
-	FILE *p;
+	char message[8];
+	FILE *f = fopen("steer.log", "w");
+	fprintf(f, __DATE__);
+	fclose(f);
 	int serverD, ECUclientD, clientLen, amount;
+	signal(SIGINT, handler);
+	signal(SIGUSR1, flagHandle);
 	struct sockaddr_un ecuAddr;
 	clientLen = sizeof(ecuAddr);
 	printf("in attesa...\n");
 	serverD = serverSocket("steer");
 	listen(serverD, 5);
-	while (1)
+	int child = fork();
+	if (child < 0)
 	{
-		ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, clientLen);
-		//passa il comando
+		perror("fork");
+		exit(EXIT_FAILURE);
 	}
+	else if (child == 0)
+	{ //scrive no action mentre processo padre aspetta richieste
+
+		for (;;)
+		{
+			if (flag == 0)
+			{
+				steerLog("NO ACTION");
+			}
+		}
+	}
+	else
+	{
+		while (1)
+		{
+			ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
+			kill(child, SIGUSR1);
+			if (ECUclientD < 0)
+			{
+				fprintf(stderr, "impossibile connettersi");
+			}
+			if (recv(ECUclientD, message, sizeof(message), 0) < 0)
+			{
+				fprintf(stderr, "impossibile leggere");
+			}
+			steerLog(message);
+			kill(child, SIGUSR1);
+			close(ECUclientD);
+		}
+	}
+
+
 }

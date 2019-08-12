@@ -8,7 +8,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "ServerOneConnection.h"
+#include "SocketConnection.h"
+int flag = 0;
+void flagHandle(int sig)
+{
+	flag = (flag + 1) % 2;
+}
+void handler(int sig)
+{
+	kill(0, SIGINT);
+	exit(EXIT_SUCCESS);
+}
 
 void decreaseSpeed(int amount)
 {
@@ -16,8 +26,11 @@ void decreaseSpeed(int amount)
 	int len = strlen("DECREMENTO 5\n");
 	while (amount != 0)
 	{
+
 		fwrite("DECREMENTO 5\n", 1, len, f);
 		amount = amount - 5;
+		fflush(f);
+
 		sleep(1);
 	}
 	fclose(f);
@@ -27,7 +40,7 @@ void log(char *message)
 {
 	FILE *f = fopen("brake.log", "a");
 	int len = strlen(message);
-	fwrite(message, 1, len, f);
+	fprintf(f, "%s\n",message);
 	fclose(f);
 	sleep(1);
 }
@@ -65,19 +78,54 @@ void brakeAction(char *message)
 int main(int argc, char *argv[])
 {
 	char message[10];
-	int serverD, ECU, clientLen;
+	FILE *f = fopen("brake.log", "w");
+	fprintf(f, "\n");
+	fclose(f);
+	int serverD, ECUclientD, clientLen, amount;
+	signal(SIGINT, handler);
+	signal(SIGUSR1, flagHandle);
 	struct sockaddr_un ecuAddr;
-	//inizializzo socket
 	clientLen = sizeof(ecuAddr);
 	printf("in attesa...\n");
-	serverD = make_connection("throttle");
+	serverD = serverSocket("brake");
 	listen(serverD, 5);
-	while (1)
+	int child = fork();
+	if (child < 0)
 	{
-		//DA RISCRIVERE CICLO INTERNO PER PERMETTERE TIMEOUT
-		ECU = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
-		recv(ECU, message, sizeof(message), 0);
-		brakeAction(message);
-		close(ECU);
+		perror("fork");
+		exit(EXIT_FAILURE);
 	}
+	else if (child == 0)
+	{ //scrive no action mentre processo padre aspetta richieste
+
+		for (;;)
+		{
+			if (flag == 0)
+			{
+				brakeAction("NO ACTION");
+			}
+		}
+	}
+	else
+	{
+		while (1)
+		{
+
+			ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
+			kill(child, SIGUSR1);
+			if (ECUclientD < 0)
+			{
+				fprintf(stderr, "impossibile connettersi");
+			}
+			if (recv(ECUclientD, message, sizeof(message), 0) < 0)
+			{
+				fprintf(stderr, "impossibile leggere");
+			}
+			brakeAction(message);
+			kill(child, SIGUSR1);
+			close(ECUclientD);
+		}
+	}
+
+	return 0;
 }
