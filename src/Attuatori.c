@@ -43,7 +43,13 @@ int findAmount(char str[], int pos)
 
     return amount = atoi(subStr);
 }
-
+void checkFailure(){
+    srand((unsigned int)time(0));
+    if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
+    {
+        kill(getppid(),SIGSTOP);
+    }
+}
 int throttleLog(int a)
 {
     FILE *fd = fopen("throttle.log", "a");
@@ -68,6 +74,7 @@ int throttleLog(int a)
                 perror("errore in scrittura");
             };
             a -= 5;
+            checkFailure();
             fflush(fd);
             sleep(1);
         }
@@ -179,7 +186,7 @@ void throttleControl()
                 fprintf(stderr, "impossibile leggere");
             }
             printf("%s\n", message);
-            brakeAction(message);
+            throttleAction(message);
             kill(child, SIGUSR1);
             close(ECUclientD);
         }

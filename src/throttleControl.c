@@ -12,19 +12,34 @@
 #include <sys/time.h>
 #include "SocketConnection.h"
 int flag = 0;
-void flagHandle(int sig){
-    flag = (flag +1)%2;
+void flagHandle(int sig)
+{
+    flag = (flag + 1) % 2;
 }
 void handler(int sig)
 {
     kill(0, SIGINT);
     exit(EXIT_SUCCESS);
 };
+void checkFailure(){
+    srand((unsigned int)time(0));
+    if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
+    {
+        kill(getppid(),SIGSTOP);
+    }
+}
+void throttleAction(char *message)
+{
+    int incAmount;
+    incAmount = findAmount(message, 11);
+    throttleLog(incAmount);
+}
 int throttleLog(int a)
 {
     FILE *fd = fopen("throttle.log", "a");
-    char *ma[] = {"AUMENTO 5\n", "NO ACTION\n"};
-    int len[] = {strlen("AUMENTO 5\n"), strlen("NO ACTION\n")};
+    char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"}, buff[20];
+    int len[] = {strlen(" AUMENTO 5\n"), strlen(" NO ACTION\n")};
+
     if (a == 0)
     {
 
@@ -32,30 +47,35 @@ int throttleLog(int a)
         {
             perror("impossibile scrivere");
         }
+        sleep(1);
     }
     else
     {
-
-        if (fwrite(ma[0], 1, len[0], fd) <= 0)
+        while (a > 0)
         {
-            perror("errore in scrittura");
-        };
-        a -= 5;
+            if (fwrite(ma[0], 1, len[0], fd) <= 0)
+            {
+                perror("errore in scrittura");
+            };
+            a -= 5;
+            checkFailure();
+            fflush(fd);
+            sleep(1);
+        }
     }
     fclose(fd);
-    sleep(1);
     return a;
 }
 int main()
 {
-
-    char message[10];
+    char message[15];
+    memset(message, 0, sizeof(message));
     FILE *f = fopen("throttle.log", "w");
     fprintf(f, __DATE__);
     fclose(f);
     int serverD, ECUclientD, clientLen, amount;
     signal(SIGINT, handler);
-    signal(SIGUSR1,flagHandle);
+    signal(SIGUSR1, flagHandle);
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
@@ -69,7 +89,7 @@ int main()
     }
     else if (child == 0)
     { //scrive no action mentre processo padre aspetta richieste
-
+        //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         for (;;)
         {
             if (flag == 0)
@@ -82,9 +102,9 @@ int main()
     {
         while (1)
         {
-            
+
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
-            kill(child,SIGUSR1);
+            kill(child, SIGUSR1);
             if (ECUclientD < 0)
             {
                 fprintf(stderr, "impossibile connettersi");
@@ -93,15 +113,9 @@ int main()
             {
                 fprintf(stderr, "impossibile leggere");
             }
-            amount = atoi(message);
-            while (amount > 0)
-            {
-                amount = throttleLog(amount);
-            }
-            kill(child,SIGUSR1);
+            printf("%s\n", message);
+            throttleAction(message);
+            kill(child, SIGUSR1);
             close(ECUclientD);
         }
     }
-
-    return 0;
-}
