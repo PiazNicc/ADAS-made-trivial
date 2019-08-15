@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "SocketConnection.h"
 int flag = 0;
+
 void flagHandle(int sig)
 {
 	flag = (flag + 1) % 2;
@@ -18,6 +19,12 @@ void handler(int sig)
 {
 	kill(0, SIGINT);
 	exit(EXIT_SUCCESS);
+}
+void dangerHandler(int sig)
+{
+  FILE *f = fopen("brake.log","a");
+  fprintf(f,"ARRESTO AUTO");
+  fclose(f);
 }
 
 void decreaseSpeed(int amount)
@@ -40,7 +47,7 @@ void log(char *message)
 {
 	FILE *f = fopen("brake.log", "a");
 	int len = strlen(message);
-	fprintf(f, "%s\n",message);
+	fprintf(f, "%s\n", message);
 	fclose(f);
 	sleep(1);
 }
@@ -63,9 +70,9 @@ void brakeAction(char *message)
 {
 	int decAmount;
 
-	if (strcmp(message, "ARRESTO") == 0 || strcmp(message, "NO ACTION") == 0)
+	if (strcmp(message, "PARCHEGGIO"))
 	{
-		log(message);
+		log("ARRESTO AUTO");
 	}
 
 	else
@@ -83,7 +90,8 @@ int main(int argc, char *argv[])
 	fclose(f);
 	int serverD, ECUclientD, clientLen, amount;
 	signal(SIGINT, handler);
-	signal(SIGUSR1, flagHandle);
+	signal(SIGUSR1,dangerHandler);
+	signal(SIGUSR2, flagHandle);
 	struct sockaddr_un ecuAddr;
 	clientLen = sizeof(ecuAddr);
 	printf("in attesa...\n");
@@ -102,7 +110,7 @@ int main(int argc, char *argv[])
 		{
 			if (flag == 0)
 			{
-				brakeAction("NO ACTION");
+				log("NO ACTION");
 			}
 		}
 	}
@@ -112,7 +120,7 @@ int main(int argc, char *argv[])
 		{
 
 			ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
-			kill(child, SIGUSR1);
+			kill(child, SIGUSR2);
 			if (ECUclientD < 0)
 			{
 				fprintf(stderr, "impossibile connettersi");
@@ -122,7 +130,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "impossibile leggere");
 			}
 			brakeAction(message);
-			kill(child, SIGUSR1);
+			kill(child, SIGUSR2);
 			close(ECUclientD);
 		}
 	}

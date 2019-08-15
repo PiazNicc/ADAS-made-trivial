@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <signal.h>
-#include <sys/time.h>
 #include "SocketConnection.h"
 int flag = 0;
 void flagHandle(int sig)
@@ -21,11 +20,12 @@ void handler(int sig)
     kill(0, SIGINT);
     exit(EXIT_SUCCESS);
 };
-void checkFailure(){
+void checkFailure()
+{
     srand((unsigned int)time(0));
     if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
     {
-        kill(getppid(),SIGSTOP);
+        kill(getppid(), SIGSTOP);
     }
 }
 void throttleAction(char *message)

@@ -43,7 +43,7 @@ void steerLog(unsigned char *message)
 	else
 	{
 		steerPunt = fopen("steer.log", "a");
-		fprintf(steerPunt, "%s\n", message);
+		fprintf(steerPunt, "NO ACTION\n", message);
 		fclose(steerPunt);
 		sleep(1);
 	}

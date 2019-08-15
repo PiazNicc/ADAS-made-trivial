@@ -12,26 +12,17 @@
 #include "SocketConnection.h"
 
 int main()
-{
-    char message[10];
-    strcpy(message, "25");
-    int ECUclientD, serverLen, result;
-    struct sockaddr_un serverAddr;
-    //inizializzo socket
-    serverLen = sizeof(serverAddr);
-    ECUclientD = socket(AF_UNIX, SOCK_STREAM, 0);
-    serverAddr.sun_family = AF_UNIX;
-    strcpy(serverAddr.sun_path, "throttle");
-    do
-    {
-        printf("provo a connetermi...\n");
-
-        result = connect(ECUclientD, (struct sockaddr *)&serverAddr, serverLen);
-
-        /* code */
-    } while (result == -1);
-    printf("scrivendo %d\n", atoi(message));
-    send(ECUclientD, message, strlen(message), 0);
+{ int ECUclientD;
+    char message[15];
+    memset(message,0,sizeof(message));
+    strcpy(message, "INCREMENTO 5");
+    ECUclientD = connectToServer("throttle");
+    send(ECUclientD, message, sizeof(message), 0);
+    close(ECUclientD);
+    sleep(3);
+    strcpy(message, "INCREMENTO 10");
+    ECUclientD = connectToServer("throttle");
+    send(ECUclientD, message, sizeof(message), 0);
     close(ECUclientD);
     return 0;
 }
