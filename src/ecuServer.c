@@ -139,7 +139,7 @@ int main()
                                 //INVIA COMANDO A ECUCLIENT(pipe?)
                                 //logga comando in ecu.log(oppure lo fa ecuClient?)
 			}
-			close(fd(READ));
+			close(fd[READ]);
 			i=0;
 			while(1)
 			{
