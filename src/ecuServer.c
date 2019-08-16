@@ -8,6 +8,9 @@
 #include <sys/socket.h>
 #include "SocketConnection.h"
 #include "Attuatori.h"
+#define READ 0
+#define WRITE 1
+#define MaxConnection 5
 void killProc(int array[])
 {
     for (int i = 0; i < 7; i++)
@@ -27,7 +30,7 @@ int main()
     piu client
     */
     char *command;
-    int speed = 0, serverD, clientD,len;
+    int speed = 0, serverD, clientD[5],len;
     struct sockaddr_un client;
     printf("Processo ECU Server,il mio pid è : %d , sono figlio di: %d \n", getpid(), getppid());
     printf("ID del gruppo è: %d\n", getpgid(getpid()));
@@ -113,23 +116,41 @@ int main()
                             killProc(pidArray);
                             len = sizeof(client);
                             serverD = serverSocket("ecu");
-                            listen(serverD, 5);
-                            while (1)
+                            listen(serverD, MaxConnection);
+		      int i=0;
+                            while (i<MaxConnection)
                             {
-                                clientD = accept(serverD, (struct sockaddr *)&client, &len);
-                                if (clientD < 0)
+                                clientD[i] = accept(serverD, (struct sockaddr *)&client, &len);
+                                if (clientD[i] < 0)
                                 {
                                     perror("accept");
                                     exit(EXIT_FAILURE);
                                 }
-                                if (recv(clientD, command, strlen(command), 0) < 0)
+			else
+			{
+			i++;
+			}
+		      }
+			int fd[2];
+			pipe(fd);
+			if(fork()==0)
+			{
+				ecuclient(fd);
+                                //INVIA COMANDO A ECUCLIENT(pipe?)
+                                //logga comando in ecu.log(oppure lo fa ecuClient?)
+			}
+			close(fd(READ));
+			i=0;
+			while(1)
+			{
+                                if (recv(clientD[i], command, strlen(command), 0) < 0)
                                 {
                                     perror("receive");
                                     exit(EXIT_FAILURE);
                                 }
-                                commandAction(command);
-                                //INVIA COMANDO A ECUCLIENT(pipe?)
-                                //logga comando in ecu.log(oppure lo fa ecuClient?)
+			else i=(i+1)%MaxConnection;
+			write (fd[WRITE], command, strlen (command) + 1);
+			
                             }
 
                         } //chiusura else forward
