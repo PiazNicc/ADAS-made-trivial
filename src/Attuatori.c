@@ -43,16 +43,13 @@ int findAmount(char str[], int pos)
 
     return amount = atoi(subStr);
 }
-void checkFailure()
+int checkFailure()
 {
-    srand((unsigned int)time(0));
-    if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
-    {
-        kill(getppid(), SIGSTOP);
-    }
+    return rand() < 0.00001 * ((double)RAND_MAX + 1.0);
 }
 int throttleLog(int a)
 {
+    srand((unsigned int)time(0));
     FILE *fd = fopen("throttle.log", "a");
     char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"}, buff[20];
     int len[] = {strlen(" AUMENTO 5\n"), strlen(" NO ACTION\n")};
@@ -74,8 +71,12 @@ int throttleLog(int a)
             {
                 perror("errore in scrittura");
             };
+            if (checkFailure() == 1)
+            {
+                kill(getppid(), SIGSTOP);
+                break;
+            }
             a -= 5;
-            checkFailure();
             fflush(fd);
             sleep(1);
         }
@@ -109,7 +110,7 @@ void brakeAction(char *message)
 {
     int decAmount;
 
-    if (strcmp(message, "PARCHEGGIO"))
+    if (strcmp(message, "PARCHEGGIO") == 0)
     {
         brakeLog("ARRESTO AUTO");
     }
@@ -131,23 +132,21 @@ void brakeLog(char *message)
 }
 void steerLog(unsigned char *message)
 {
-    FILE *steerPunt;
+    FILE *steerPunt = fopen("steer.log", "a");
 
     int k;
     if (strcmp(message, "DESTRA") == 0 || strcmp(message, "SINISTRA") == 0)
     {
         for (int j = 0; j < 4; j++)
         {
-            steerPunt = fopen("steer.log", "a");
             fprintf(steerPunt, "STO GIRANDO A %s\n", message);
-            fclose(steerPunt);
+            fflush(steerPunt);
             sleep(1);
         }
     }
     else
     {
-        steerPunt = fopen("steer.log", "a");
-        fprintf(steerPunt, "NO ACTION\n", message);
+        fprintf(steerPunt, "NO ACTION\n");
         fclose(steerPunt);
         sleep(1);
     }
@@ -206,8 +205,6 @@ void throttleControl()
             close(ECUclientD);
         }
     }
-
-    
 }
 
 void brakeByWire()

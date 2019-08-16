@@ -15,13 +15,13 @@ int main()
 { int ECUclientD;
     char message[15];
     memset(message,0,sizeof(message));
-    strcpy(message, "INCREMENTO 5");
-    ECUclientD = connectToServer("throttle");
+    strcpy(message, "DESTRA");
+    ECUclientD = connectToServer("steer");
     send(ECUclientD, message, sizeof(message), 0);
     close(ECUclientD);
-    sleep(3);
-    strcpy(message, "INCREMENTO 10");
-    ECUclientD = connectToServer("throttle");
+    sleep(15);
+    strcpy(message, "SINISTRA");
+    ECUclientD = connectToServer("steer");
     send(ECUclientD, message, sizeof(message), 0);
     close(ECUclientD);
     return 0;
