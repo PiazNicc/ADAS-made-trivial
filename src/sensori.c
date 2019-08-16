@@ -40,7 +40,7 @@ void parkAssist()
             perror("send");
             exit(EXIT_FAILURE);
         }
-        fprintf("\n", log);
+        fprintf(log, "\n");
         sleep(1);
     }
     fclose(log);
@@ -68,6 +68,7 @@ void forwardFacing()
                 exit(EXIT_FAILURE);
             };
             close(ecuServer);
+            fprintf(log, "\n");
             fflush(log);
         }
         sleep(2);
@@ -98,15 +99,16 @@ void surroundViews()
             perror("send");
             exit(EXIT_FAILURE);
         }
-        fprintf("\n", log);
+        fprintf(log, "\n");
         sleep(1);
     }
     fclose(log);
     fclose(p);
 }
 
-void blindSpot() {
-     unsigned char data[8];
+void blindSpot()
+{
+    unsigned char data[8];
     FILE *p = fopen("/dev/urandom", "r");
     FILE *log = fopen("spot.log", "a");
     int len = sizeof(data), ecuServer;
@@ -129,10 +131,9 @@ void blindSpot() {
             perror("send");
             exit(EXIT_FAILURE);
         }
-        fprintf("\n", log);
+        fprintf(log, "\n");
         sleep(0.5);
     }
     fclose(log);
     fclose(p);
-    
 }
