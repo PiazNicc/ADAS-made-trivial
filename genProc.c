@@ -12,10 +12,9 @@ void killProc(int array[]){
 }
 
 int  main(int argc, char *argv[]){
-	printf("Processo input,il mio pid è : %d\n",getpid());
-	int pidECU_S=fork();
 	
-	if(pidECU_S == 0){  //ECU SERVER CREATO
+	
+	 //ECU SERVER 
 		printf("Processo ECU Server,il mio pid è : %d , sono figlio di: %d \n",getpid(),getppid());
 		printf("ID del gruppo è: %d\n",getpgid(getpid()));
 
@@ -23,9 +22,9 @@ int  main(int argc, char *argv[]){
 		int pidArray[7];
 		int i=0;
 
-		if(pidECU_C == 0){	//ECU CLIENT
+		if(pidECU_C == 0){	//wind
 		/*CODICE del processo*/	
-			printf("Processo ECU Client,il mio pid è : %d , sono figlio di: %d \n",getpid(),getppid());
+			printf("Processo frontWindshield,il mio pid è : %d , sono figlio di: %d \n",getpid(),getppid());
 			sleep(100);
 			
 		}else{		//Server crea un altro figlio -throttle
@@ -87,8 +86,8 @@ int  main(int argc, char *argv[]){
 									pidArray[i] = pidBlindSpot;
 									printf("Now ECU is gonna kill the processes\n");
 							/*CODICE DEL PROCESSO ECU SERVER*/
-									killProc(pidArray); //stampa il pid di tutti i processi
-									sleep(100);
+									killProc(pidArray); //stamp il pid di tutti i processi
+									while(1){}
 								}
 
 							}	//chiusura else forward
@@ -106,11 +105,9 @@ int  main(int argc, char *argv[]){
 			}			//chiusura else throttle
 	
 
-		}		//chiusura else ecu client
+		}
+				//chiusura else ecu client
 	
-	}else{
+	}
 
-		wait();		//codice del processo input
-	}			//chiusura else ecu server
 
-}
