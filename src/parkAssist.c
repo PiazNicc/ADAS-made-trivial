@@ -13,7 +13,7 @@ void main()
 	FILE *p = fopen("/dev/urandom", "r");
 	FILE *log = fopen("assist.log", "w");
 	int len = sizeof(data), ecuServer;
-	unsigned int rng = 0;
+	unsigned int *rng;
 	if (p == NULL || log == NULL)
 	{
 		perror("errore in apertura file");
@@ -21,7 +21,7 @@ void main()
 	}
 	for (int secs = 0; secs < 30; secs++)
 	{
-		fread(data, 1, 4, p);
+		fread(rng, 1, 4, p);
 		for (int i = 0; i < 4; i++)
 		{
 			fprintf(log,"%X ",(int)data[i]);
@@ -29,6 +29,7 @@ void main()
 		}
 		//ecuServer = connectToServer("ecu");
 		//send(ecuServer, &data, len, 0);
+		
 		fprintf(log,"\n");
 		fflush(log);
 		//sleep(1);

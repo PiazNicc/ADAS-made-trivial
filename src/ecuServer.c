@@ -20,9 +20,6 @@ void killProc(int array[])
         wait();
     }
 }
-void commandAction(char *com){
-    
-}
 int main()
 {
     /* versione base che gestisce solo un sensore(front windshield),per i sensori
@@ -53,7 +50,7 @@ int main()
         if(pidRadar < 0){perror("fork"); exit(EXIT_FAILURE);}
         if (pidRadar == 0)
         { // radar
-            /*CODICE del processo rada*/
+            /*CODICE del processo radar*/
             printf("Processo radar,il mio pid è : %d , sono figlio di: %d \n", getpid(), getppid());
             sleep(100);
         }
@@ -135,6 +132,7 @@ int main()
 			pipe(fd);
 			if(fork()==0)
 			{
+                close(fd[WRITE]);
 				ecuclient(fd);
                                 //INVIA COMANDO A ECUCLIENT(pipe?)
                                 //logga comando in ecu.log(oppure lo fa ecuClient?)

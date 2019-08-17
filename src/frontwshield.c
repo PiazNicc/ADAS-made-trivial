@@ -1,67 +1,39 @@
-#include<stdlib.h>
-#include<stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <string.h>
 #include "SocketConnection.h"
-
-
-FILE *openFileInput(){
-FILE *wscPunt;
-wscPunt;
-return wscPunt=fopen("input/frontCamera.data","r");
-
-}
-
-FILE *openFileOutput(){
-FILE *wscPunt;
-wscPunt;
-return wscPunt=fopen("camera.log","w");
-}
-
-
-
-void readData(FILE *fin,FILE *fout,int clientFD){
-	char buffer[15];
-	while(fgets(buffer,sizeof(buffer),fin)!=NULL){
-		/*codice per inviare il dato*/
-		writeToSocket(clientFD,buffer);
-		writeData(fout,buffer);
-		sleep(10);
-	}
-}
-void writeData(FILE *Punt,char *buffer)
-{
-	
-	fwrite(buffer,1,strlen(buffer),Punt);  //strlen in questo caso è sicuro perchè fgets mette SEMPRE il terminatore a fine lettura
-	//puts(buffer);
-	
-
-}
-
+#define _GNU_SOURCE
 
 void main()
 
-
 {
-	int error=0;
-	FILE *wscIN=openFileInput();
-	FILE *wscOUT=openFileOutput();
-	int clientFd=connectToServer("ecu");
-	
-	if(wscIN==NULL){
-	printf("error not open fileINPUT");
-	error++;
+	FILE *wscIN = fopen("input/frontCamera.data", "r");
+	FILE *wscOUT = fopen("log/camera.log", "a");
+	char data[128];
+	memset(data,0,sizeof(data));
+	int ecu;
+
+	if (wscIN == NULL)
+	{
+		perror("error not open fileINPUT");
+		exit(EXIT_FAILURE);
 	}
-	if(wscOUT==NULL){
-	printf("error not open fileOUTPUT");
-	error++;
+	if (wscOUT == NULL)
+	{
+		perror("error not open fileOUTPUT");
+		exit(EXIT_FAILURE);
 	}
-	if(error==0){
-	readData(wscIN,wscOUT,clientFd);
+	while ( fgets(data, sizeof(data), wscIN) != NULL)
+	{ 
+		ecu = connectToServer("ecu");
+		printf("%s",data);
+		send(ecu,data,sizeof(data),0);
+		sleep(10);
 	}
+
 	fclose(wscOUT);
 	fclose(wscIN);
-	
 }
-
-
-
