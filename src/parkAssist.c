@@ -21,13 +21,17 @@ void main()
 	}
 	for (int secs = 0; secs < 30; secs++)
 	{
-		//
 		fread(data, 1, 4, p);
-		fwrite(data, 1, 4, log);
-		ecuServer = connectToServer("ecu");
-		send(ecuServer, &data, len, 0);
-		fprintf("\n",log);
-		sleep(1);
+		for (int i = 0; i < 4; i++)
+		{
+			fprintf(log,"%X ",(int)data[i]);
+		
+		}
+		//ecuServer = connectToServer("ecu");
+		//send(ecuServer, &data, len, 0);
+		fprintf(log,"\n");
+		fflush(log);
+		//sleep(1);
 	}
 	fclose(log);
 	fclose(p);

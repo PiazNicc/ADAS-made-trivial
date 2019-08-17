@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "SocketConnection.h"
-#include "Attuatori.h"
+#include "attuatori.h"
 
 int main(){
 	steerByWire();
