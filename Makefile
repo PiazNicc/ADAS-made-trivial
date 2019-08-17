@@ -1,13 +1,13 @@
-incl/attuatori.o: src/attuatori.h incl/sensori.o incl/azioni.o
-	cc -c src/attuatori.c -o incl/attuatori.o
+objs/attuatori.o: src/attuatori.h objs/sensori.o objs/azioni.o
+	cc -c src/attuatori.c -o objs/attuatori.o
+	
+objs/sensori.o: src/sensori.h objs/SocketConnection.o
+	cc -c src/sensori.c -o objs/sensori.o
 
-incl/sensori.o: src/sensori.h incl/SocketConnection.o
-	cc -c src/sensori.c -o incl/sensori.o
+objs/SocketConnection.o: src/SocketConnection.h
+	cc -c src/SocketConnection.c -o objs/SocketConnection.o
 
-incl/SocketConnection.o: src/SocketConnection.h
-	cc -c src/SocketConnection.c -o incl/SocketConnection.o
-
-incl/azioni.o: src/azioni.h
-	cc -c src/azioni.c -o incl/azioni.o
+objs/azioni.o: src/azioni.h
+	cc -c src/azioni.c -o objs/azioni.o
 clean:
-	rm incl/*.o
+	rm objs/*.o
