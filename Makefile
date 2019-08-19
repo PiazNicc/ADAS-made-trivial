@@ -1,13 +1,37 @@
-objs/attuatori.o: src/attuatori.h objs/sensori.o objs/azioni.o
-	cc -c src/attuatori.c -o objs/attuatori.o
-	
-objs/sensori.o: src/sensori.h objs/SocketConnection.o
-	cc -c src/sensori.c -o objs/sensori.o
+INPUT = bin/in.out
+OUTPUT = bin/out.out
+FLAGS = -O -Wall
+LOC = include/
+SOURCE = src/*.c
+INCL = -I$(LOC)
+LIBS = $(LOC)/*.h
+OBJDIR = objs/
+OBJS = input.o ecu.o attuatori.o sensori.o \
+	  SocketConnection.o  azioni.o output.o
+COMPONENTS = input.o ecu.o attuatori.o sensori.o \
+	  SocketConnection.o  azioni.o 
 
-objs/SocketConnection.o: src/SocketConnection.h
-	cc -c src/SocketConnection.c -o objs/SocketConnection.o
+all: $(INPUT) $(OUTPUT) moveObjects
 
-objs/azioni.o: src/azioni.h
-	cc -c src/azioni.c -o objs/azioni.o
+
+moveObjects:
+	mv *.o objs/
+
+$(OUTPUT) : output.o
+	cc $(FLAGS) -o $@  output.o
+
+
+
+$(INPUT): $(COMPONENTS)
+	cc $(FLAGS) -o $@ $(COMPONENTS)
+
+$(OBJS): $(LIBS)
+	cc $(FLAGS) $(INCL) -c $(SOURCE) 
+
+
+
+
+
 clean:
 	rm objs/*.o
+

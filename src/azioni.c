@@ -37,7 +37,7 @@ int throttleLog(int a)
 {
     srand((unsigned int)time(0));
     FILE *fd = fopen("log/throttle.log", "a");
-    char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"}, buff[20];
+    char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"};
     int len[] = {strlen(" AUMENTO 5\n"), strlen(" NO ACTION\n")};
 
     if (a == 0)
@@ -70,7 +70,6 @@ int throttleLog(int a)
     fclose(fd);
     return a;
 }
-
 
 void decreaseSpeed(int amount)
 {
@@ -106,17 +105,15 @@ void brakeAction(char *message)
 
 void brakeLog(char *message)
 {
-    FILE *f = fopen("brake.log", "a");
-    int len = strlen(message);
+    FILE *f = fopen("log/brake.log", "a");
     fprintf(f, "%s\n", message);
     fclose(f);
     sleep(1);
 }
-void steerLog(unsigned char *message)
+void steerLog(char *message)
 {
     FILE *steerPunt = fopen("log/steer.log", "a");
 
-    int k;
     if (strcmp(message, "DESTRA") == 0 || strcmp(message, "SINISTRA") == 0)
     {
         for (int j = 0; j < 4; j++)

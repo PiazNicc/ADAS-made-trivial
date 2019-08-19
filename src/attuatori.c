@@ -14,21 +14,31 @@
 #include "attuatori.h"
 #include "azioni.h"
 
-int flag = 0;
+int throttleFlag = 0;
+int brakeFlag = 0;
+int steerFlag = 0;
 
-void flagHandle(int sig)
+void throttleflagHandle(int sig)
 {
-    flag = (flag + 1) % 2;
+    throttleFlag = (throttleFlag + 1) % 2;
+}
+void  brakeFlagHandle(int sig)
+{
+    brakeFlag = (brakeFlag + 1) % 2;
+}
+void steerFlagHandle(int sig)
+{
+    steerFlag = (steerFlag + 1) % 2;
 }
 void exitHandler(int sig)
 {
-    kill(0, SIGINT);
+    kill(0, SIGKILL);
     exit(EXIT_SUCCESS);
 }
 
 void dangerHandler(int sig)
 {
-    FILE *f = fopen("brake.log", "a");
+    FILE *f = fopen("log/brake.log", "a");
     fprintf(f, "ARRESTO AUTO");
     fclose(f);
 }
@@ -39,12 +49,13 @@ void throttleControl()
 {
     char message[15];
     memset(message, 0, sizeof(message));
-    FILE *f = fopen("throttle.log", "w");
+    FILE *f = fopen("log/throttle.log", "w");
     fprintf(f, __DATE__);
     fclose(f);
-    int serverD, ECUclientD, clientLen, amount;
-    signal(SIGINT, exitHandler);
-    signal(SIGUSR1, flagHandle);
+    int serverD, ECUclientD;
+    unsigned int clientLen;
+    signal(SIGKILL, exitHandler);
+    signal(SIGUSR2, throttleflagHandle);
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
@@ -61,7 +72,7 @@ void throttleControl()
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         for (;;)
         {
-            if (flag == 0)
+            if (throttleFlag == 0)
             {
                 throttleLog(0);
             }
@@ -92,13 +103,14 @@ void throttleControl()
 void brakeByWire()
 {
     char message[10];
-    FILE *f = fopen("brake.log", "w");
+    FILE *f = fopen("log/brake.log", "w");
     fprintf(f, "\n");
     fclose(f);
-    int serverD, ECUclientD, clientLen, amount;
-    signal(SIGINT, exitHandler);
+    int serverD, ECUclientD;
+    unsigned int clientLen;
+    signal(SIGKILL, exitHandler);
     signal(SIGUSR1, dangerHandler);
-    signal(SIGUSR2, flagHandle);
+    signal(SIGUSR2, brakeFlagHandle);
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
@@ -115,7 +127,7 @@ void brakeByWire()
 
         for (;;)
         {
-            if (flag == 0)
+            if (brakeFlag == 0)
             {
                 brakeLog("NO ACTION");
             }
@@ -147,12 +159,13 @@ void steerByWire()
 {
     char message[15];
     memset(message, 0, sizeof(message));
-    FILE *f = fopen("steer.log", "w");
+    FILE *f = fopen("log/steer.log", "w");
     fprintf(f, __DATE__);
     fclose(f);
-    int serverD, ECUclientD, clientLen, amount;
-    signal(SIGINT, exitHandler);
-    signal(SIGUSR1, flagHandle);
+    int serverD, ECUclientD;
+    unsigned int clientLen;
+    signal(SIGKILL, exitHandler);
+    signal(SIGUSR1, steerFlagHandle);
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
@@ -169,7 +182,7 @@ void steerByWire()
 
         for (;;)
         {
-            if (flag == 0)
+            if (steerFlag == 0)
             {
                 steerLog("NO ACTION");
             }

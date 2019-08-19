@@ -29,9 +29,12 @@ void frontWindshield()
         }
         while (fgets(data, sizeof(data), wscIN) != NULL)
         {
+
             ecu = connectToServer("ecu");
-            printf("%s", data);
             send(ecu, data, sizeof(data), 0);
+            close(ecu);
+            fputs(data, wscOUT);
+            fflush(wscOUT);
             sleep(10);
         }
 
@@ -41,36 +44,38 @@ void frontWindshield()
 }
 void parkAssist()
 {
-    unsigned char data[4];
+    int data[4];
+    int secs = 0,i;
     FILE *p = fopen("/dev/urandom", "r");
-    FILE *log = fopen("assist.log", "w");
-    int len = sizeof(data), ecuServer;
-    unsigned int rng = 0;
+    FILE *log = fopen("log/assist.log", "w");
+    int ecuServer;
     if (p == NULL || log == NULL)
     {
         perror("errore in apertura file");
         exit(EXIT_FAILURE);
     }
-    for (int secs = 0; secs < 30; secs++)
+    for ( secs = 0; secs < 30; secs++)
     {
         //
-        if (fread(data, 1, 4, p) < 4)
+        /*if (fread(data, 1, 4, p) < 4)
         {
             perror("read");
             exit(EXIT_FAILURE);
-        }
-        if (fwrite(data, 1, 4, log) < 4)
+        }*/
+        for ( i = 0; i < 4; i++)
         {
-            perror("write");
-            exit(EXIT_FAILURE);
+            data[i] = getc(p);
+            fprintf(log,"%0x ",data[i]);
         }
-        ecuServer = connectToServer("ecu");
-        if (send(ecuServer, data, strlen(data), 0) < 0)
-        {
-            perror("send");
-            exit(EXIT_FAILURE);
-        }
+        
+       // ecuServer = connectToServer("ecu");
+        ///if (send(ecuServer, data, strlen(data), 0) < 0)
+        //{
+        ///    perror("send");
+       // /    exit(EXIT_FAILURE);
+       // }
         fprintf(log, "\n");
+        fflush(log);
         sleep(1);
     }
     fclose(log);
@@ -78,10 +83,10 @@ void parkAssist()
 }
 void forwardFacing()
 {
-    unsigned char data[24];
+    char data[24];
     FILE *p = fopen("/dev/random", "r");
-    FILE *log = fopen("radar.log", "a");
-    int len = sizeof(data), ecuServer;
+    FILE *log = fopen("log/radar.log", "a");
+    int ecuServer;
     for (;;)
     {
         if (fread(data, 1, 24, p) == 24)
@@ -106,10 +111,10 @@ void forwardFacing()
 }
 void surroundViews()
 {
-    unsigned char data[16];
+    char data[16];
     FILE *p = fopen("/dev/urandom", "r");
-    FILE *log = fopen("cameras.log", "a");
-    int len = sizeof(data), ecuServer;
+    FILE *log = fopen("log/cameras.log", "a");
+    int ecuServer;
     for (int secs = 0; secs < 30; secs++)
     {
         //
@@ -138,10 +143,10 @@ void surroundViews()
 
 void blindSpot()
 {
-    unsigned char data[8];
+    char data[8];
     FILE *p = fopen("/dev/urandom", "r");
-    FILE *log = fopen("spot.log", "a");
-    int len = sizeof(data), ecuServer;
+    FILE *log = fopen("log/spot.log", "a");
+    int ecuServer;
     for (int secs = 0; secs < 4; secs++)
     {
         //
@@ -162,7 +167,7 @@ void blindSpot()
             exit(EXIT_FAILURE);
         }
         fprintf(log, "\n");
-        sleep(0.5);
+        sleep(1);
     }
     fclose(log);
     fclose(p);

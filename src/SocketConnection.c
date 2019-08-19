@@ -9,25 +9,8 @@
 #include "SocketConnection.h"
 #define DEFAULT 0
 
-int writeToSocket(int fd, char *line1)
-{
-  int d = write(fd, line1, strlen(line1) + 1); /* Write first line */
-  printf("%s", line1);
-  return d;
-}
 
-int readLineFromSocket(int fd, char *str)
-{
-  /* Read a single ’\0’-terminated line into str from fd */
-  int n;
-  do
-  {                       /* Read characters until ’\0’ or end-of-input */
-    n = read(fd, str, 1); /* Read one character */
-  } while (n > 0 && *str++ != '\0');
-  return (n > 0);
-} /* Return false if end-of-input */
-
-int serverSocket(unsigned char *name)
+int serverSocket(char *name)
 {
   int socketFd, socketLen;
   struct sockaddr_un sockUNIXAddress; /*Server address */
@@ -42,12 +25,12 @@ int serverSocket(unsigned char *name)
   return socketFd;
 }
 
-int connectToServer(unsigned char *serverName)
+int connectToServer(char *serverName)
 {
   int clientFd, serverLen, result;
   struct sockaddr_un serverAddr;
   //inizializzo socket
-  memset(&serverAddr,0,sizeof(serverAddr));
+  memset(&serverAddr, 0, sizeof(serverAddr));
   serverLen = sizeof(serverAddr);
   clientFd = socket(AF_UNIX, SOCK_STREAM, 0);
   serverAddr.sun_family = AF_UNIX;
@@ -55,11 +38,8 @@ int connectToServer(unsigned char *serverName)
   do
   {
     result = connect(clientFd, (struct sockaddr *)&serverAddr, serverLen);
-    if (result == -1)
-    {
-      printf("impossibile connettersi,nuovo tentativo in 1 secondo\n");
-      sleep(1); /* Wait and then try again */
-    }
+    /* Wait and then try again */
+
   } while (result == -1);
   return clientFd;
 }

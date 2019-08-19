@@ -12,4 +12,4 @@ void brakeAction(char *message);
 
 void brakeLog(char *message);
 
-void steerLog(unsigned char *message);
+void steerLog(char *message);

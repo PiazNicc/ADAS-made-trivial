@@ -5,7 +5,7 @@
 
 int main()
 {
-    FILE *f = fopen("ECU.log", "r");
+    FILE *f = fopen("log/ECU.log", "r");
     char buff[128];
     
 
@@ -17,11 +17,11 @@ int main()
 
     while (1) 
     {
-        {
+        
             fgets(buff, sizeof(buff), f);
             fputs(buff, stdout);
             sleep(1);
-        }
+        
     }
     return 0;
 }
