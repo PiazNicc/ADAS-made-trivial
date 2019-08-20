@@ -6,10 +6,10 @@ SOURCE = src/*.c
 INCL = -I$(LOC)
 LIBS = $(LOC)/*.h
 OBJDIR = objs/
-OBJS = input.o ecu.o attuatori.o sensori.o \
-	  SocketConnection.o  azioni.o output.o
+OBJS = input.o ecu.o attuatori.o sensori.o  \
+	  SocketConnection.o  azioni.o output.o creazione.o
 COMPONENTS = input.o ecu.o attuatori.o sensori.o \
-	  SocketConnection.o  azioni.o 
+	  SocketConnection.o  azioni.o creazione.o
 
 all: $(INPUT) $(OUTPUT) moveObjects
 

@@ -8,13 +8,16 @@
 #include "ecu.h"
 #include <sys/socket.h>
 #include "SocketConnection.h"
+#define NORMALE 0
+#define ARTIFICIALE 1
 void killAll(int sig)
 {
-    kill(0, SIGINT);
+    kill(0, SIGKILL);
     exit(0);
 }
 int main(int argc, char *argv[])
 { //usar e pipe per comunicare con ecuServer?
+    int mode;
     if (argv[1] == NULL)
     {
         printf("NESSUNA MODALITÀ SELEZIONATA");
@@ -26,17 +29,17 @@ int main(int argc, char *argv[])
     int ecuD;
     if (strcmp(argv[1], "NORMALE") == 0)
     {
+        mode = NORMALE;
     }
     else if (strcmp(argv[1], "ARTIFICIALE") == 0)
     {
-        printf("artificiale\n");
+        mode = ARTIFICIALE;
     }
     else
     {
         printf("MODALITÀ SELEZIONATA NON RICONOSCIUTA:SCEGLIERE TRA NORMALE E ARTIFICIALE\n");
         exit(-1);
     }
-
     printf("macchina accesa,scrivere INIZIO per mettere in moto\n\n");
     scanf("%s", &input);
     while (strcmp(input, "INIZIO") != 0)
@@ -46,13 +49,10 @@ int main(int argc, char *argv[])
     }
     if (fork() == 0)
     {
-        //fcntl(fd[1], F_SETFL, O_NONBLOCK);
-        //close(fd[0]);
-        ecu();
+        ecu(mode);
     }
     else
     {
-        //CON LA PIPE NON FUNZIONAVA,USO SOCKET
         printf("\nMacchina in moto,digitare PARCHEGGIO quando si vuole avviare la procedura apposita\n\n");
         scanf("%s", &input);
         while (strcmp(input, "PARCHEGGIO") != 0)
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
             printf("\ninput non riconosciuto,digitare PARCHEGGIO per fermare la macchina\n\n");
             scanf("%s", &input);
         }
-        ecuD= connectToServer("ecu");
-        send(ecuD,input,strlen(input),0);
+        ecuD = connectToServer(".ecu");
+        send(ecuD, input, strlen(input), 0);
         close(ecuD);
         printf("sto parcheggiando\n");
     }

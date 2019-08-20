@@ -59,7 +59,7 @@ void throttleControl()
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
-    serverD = serverSocket("throttle");
+    serverD = serverSocket(".throttle");
     listen(serverD, 5);
     int child = fork();
     if (child < 0)
@@ -114,7 +114,7 @@ void brakeByWire()
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
-    serverD = serverSocket("brake");
+    serverD = serverSocket(".brake");
     listen(serverD, 5);
     int child = fork();
     if (child < 0)
@@ -169,7 +169,7 @@ void steerByWire()
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
     printf("in attesa...\n");
-    serverD = serverSocket("steer");
+    serverD = serverSocket(".steer");
     listen(serverD, 5);
     int child = fork();
     if (child < 0)

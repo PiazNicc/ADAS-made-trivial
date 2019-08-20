@@ -30,7 +30,7 @@ void frontWindshield()
         while (fgets(data, sizeof(data), wscIN) != NULL)
         {
 
-            ecu = connectToServer("ecu");
+            ecu = connectToServer(".ecu");
             send(ecu, data, sizeof(data), 0);
             close(ecu);
             fputs(data, wscOUT);
@@ -42,11 +42,16 @@ void frontWindshield()
         fclose(wscIN);
     }
 }
-void parkAssist()
+void parkAssist(int mode)
 {
+    FILE *p;
     int data[4];
-    int secs = 0,i;
-    FILE *p = fopen("/dev/urandom", "r");
+    int secs = 0, i;
+    if (mode == 0)
+    {
+        p = fopen("/dev/urandom", "r");
+    }
+
     FILE *log = fopen("log/assist.log", "w");
     int ecuServer;
     if (p == NULL || log == NULL)
@@ -54,7 +59,7 @@ void parkAssist()
         perror("errore in apertura file");
         exit(EXIT_FAILURE);
     }
-    for ( secs = 0; secs < 30; secs++)
+    for (secs = 0; secs < 30; secs++)
     {
         //
         /*if (fread(data, 1, 4, p) < 4)
@@ -62,18 +67,18 @@ void parkAssist()
             perror("read");
             exit(EXIT_FAILURE);
         }*/
-        for ( i = 0; i < 4; i++)
+        for (i = 0; i < 4; i++)
         {
             data[i] = getc(p);
-            fprintf(log,"%0x ",data[i]);
+            fprintf(log, "%0x ", data[i]);
         }
-        
-       // ecuServer = connectToServer("ecu");
+
+        // ecuServer = connectToServer("ecu");
         ///if (send(ecuServer, data, strlen(data), 0) < 0)
         //{
         ///    perror("send");
-       // /    exit(EXIT_FAILURE);
-       // }
+        // /    exit(EXIT_FAILURE);
+        // }
         fprintf(log, "\n");
         fflush(log);
         sleep(1);
@@ -81,7 +86,7 @@ void parkAssist()
     fclose(log);
     fclose(p);
 }
-void forwardFacing()
+void forwardFacing(int mode)
 {
     char data[24];
     FILE *p = fopen("/dev/random", "r");
@@ -109,7 +114,7 @@ void forwardFacing()
         sleep(2);
     }
 }
-void surroundViews()
+void surroundViews(int mode)
 {
     char data[16];
     FILE *p = fopen("/dev/urandom", "r");
@@ -141,7 +146,7 @@ void surroundViews()
     fclose(p);
 }
 
-void blindSpot()
+void blindSpot(int mode)
 {
     char data[8];
     FILE *p = fopen("/dev/urandom", "r");
