@@ -67,6 +67,6 @@ int main(int argc, char *argv[])
         free(input);
         printf("sto parcheggiando\n");
     }
-    //wait(SIGCHLD);
+    wait(SIGCHLD);
     exit(0);
 }
