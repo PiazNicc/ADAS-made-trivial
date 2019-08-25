@@ -8,6 +8,6 @@ fi
 
 
 
-x-terminal-emulator -e bin/in.out $1 & bin/out.out 
+x-terminal-emulator -e bin/out.out  & bin/in.out  $1
 
 

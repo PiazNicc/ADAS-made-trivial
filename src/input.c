@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     }
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
-    char input[15];
+    char *input = malloc(255);
     int ecuD;
     if (strcmp(argv[1], "NORMALE") == 0)
     {
@@ -41,12 +41,13 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     printf("macchina accesa,scrivere INIZIO per mettere in moto\n\n");
-    scanf("%s", &input);
+    scanf("%s", input);
     while (strcmp(input, "INIZIO") != 0)
     {
         printf("\ninput non riconosciuto,scrivere INIZIO\n\n");
-        scanf("%s", &input);
+        scanf("%s", input);
     }
+
     if (fork() == 0)
     {
         ecu(mode);
@@ -54,16 +55,18 @@ int main(int argc, char *argv[])
     else
     {
         printf("\nMacchina in moto,digitare PARCHEGGIO quando si vuole avviare la procedura apposita\n\n");
-        scanf("%s", &input);
+        scanf("%s", input);
         while (strcmp(input, "PARCHEGGIO") != 0)
         {
             printf("\ninput non riconosciuto,digitare PARCHEGGIO per fermare la macchina\n\n");
-            scanf("%s", &input);
+            scanf("%s", input);
         }
         ecuD = connectToServer(".ecu");
-        send(ecuD, input, strlen(input), 0);
+        send(ecuD, input, 255, 0);
         close(ecuD);
+        free(input);
         printf("sto parcheggiando\n");
     }
+    //wait(SIGCHLD);
     exit(0);
 }

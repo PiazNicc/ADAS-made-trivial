@@ -13,8 +13,7 @@ void frontWindshield()
     {
         FILE *wscIN = fopen("input/frontCamera.data", "r");
         FILE *wscOUT = fopen("log/camera.log", "a");
-        char data[128];
-        memset(data, 0, sizeof(data));
+        char data[255];
         int ecu;
 
         if (wscIN == NULL)
@@ -50,7 +49,11 @@ void parkAssist(int mode)
     if (mode == 0)
     {
         p = fopen("/dev/urandom", "r");
+    } else
+    {
+        p = fopen("input/urandomARTIFICIALE.binary","r");
     }
+    
 
     FILE *log = fopen("log/assist.log", "w");
     int ecuServer;

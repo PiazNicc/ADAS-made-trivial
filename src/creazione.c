@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "creazione.h"
 
-int creaAttuatore(void (*f)())
+int crea(void (*f)())
 {
     int pid = fork();
     if (pid < 0)
@@ -13,6 +14,7 @@ int creaAttuatore(void (*f)())
     }
     else if (pid == 0)
     {
+        setpgid(getpid(),getpid());
         (*f)();
     }
     else
@@ -21,7 +23,7 @@ int creaAttuatore(void (*f)())
     }
 }
 
-int creaSensore(int mode,void (*f)(int)){
+int creaConModalita(int mode,void (*f)(int)){
     int pid = fork();
     if (pid < 0)
     {
@@ -30,6 +32,7 @@ int creaSensore(int mode,void (*f)(int)){
     }
     else if (pid == 0)
     {
+        setpgid(getpid(),getpid());
         (*f)(mode);
     }
     else

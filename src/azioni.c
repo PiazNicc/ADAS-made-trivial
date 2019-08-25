@@ -6,7 +6,9 @@
 #include <errno.h>
 #include <time.h>
 #include <signal.h>
+#include <sys/socket.h>
 #include "azioni.h"
+#include "SocketConnection.h"
 void throttleAction(char *message)
 {
     int incAmount;
@@ -32,43 +34,6 @@ int findAmount(char str[], int pos)
 int checkFailure()
 {
     return rand() < 0.00001 * ((double)RAND_MAX + 1.0);
-}
-int throttleLog(int a)
-{
-    srand((unsigned int)time(0));
-    FILE *fd = fopen("log/throttle.log", "a");
-    char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"};
-    int len[] = {strlen(" AUMENTO 5\n"), strlen(" NO ACTION\n")};
-
-    if (a == 0)
-    {
-
-        if (fwrite(ma[1], 1, len[1], fd) <= 0)
-        {
-            perror("impossibile scrivere");
-        }
-        sleep(1);
-    }
-    else
-    {
-        while (a > 0)
-        {
-            if (fwrite(ma[0], 1, len[0], fd) <= 0)
-            {
-                perror("errore in scrittura");
-            };
-            if (checkFailure() == 1)
-            {
-                kill(getppid(), SIGSTOP);
-                break;
-            }
-            a -= 5;
-            fflush(fd);
-            sleep(1);
-        }
-    }
-    fclose(fd);
-    return a;
 }
 
 void decreaseSpeed(int amount)
@@ -103,18 +68,11 @@ void brakeAction(char *message)
     }
 }
 
-void brakeLog(char *message)
-{
-    FILE *f = fopen("log/brake.log", "a");
-    fprintf(f, "%s\n", message);
-    fclose(f);
-    sleep(1);
-}
-void steerLog(char *message)
+void steerLog(char message[])
 {
     FILE *steerPunt = fopen("log/steer.log", "a");
-
-    if (strcmp(message, "DESTRA") == 0 || strcmp(message, "SINISTRA") == 0)
+    char m[] = "DESTRA",m2[] = "SINISTRA";
+    if (strcmp(message, m2) == 0 || strcmp(message, m) == 0)
     {
         for (int j = 0; j < 4; j++)
         {
@@ -126,7 +84,61 @@ void steerLog(char *message)
     else
     {
         fprintf(steerPunt, "NO ACTION\n");
-        fclose(steerPunt);
+        fflush(steerPunt);
         sleep(1);
     }
+    fclose(steerPunt);
+}
+
+int ecuAction(int currSpeed, char *command)
+{
+    int change = currSpeed, inc = atoi(command), d;
+    char m[255];
+    char *c;
+    if (inc != 0)
+    {
+        change = inc;
+
+        if (change > currSpeed)
+        {
+            c = "INCREMENTO ";
+            int i = snprintf(m, sizeof(m), "%s%d\n", c, change - currSpeed);
+            d = connectToServer(".throttle");
+            if (send(d, m, sizeof(m), 0) < 0)
+            {
+                perror("send");
+                exit(EXIT_FAILURE);
+            }
+            printf(m);
+        }
+        else if (change < currSpeed)
+        {
+            c = "FRENO ";
+            int i = snprintf(m, sizeof(m), "%s%d\n", c, currSpeed - change);
+            d = connectToServer(".brake");
+            if (send(d, m, sizeof(m), 0) < 0)
+            {
+                perror("send");
+                exit(EXIT_FAILURE);
+            }
+            printf(m);
+        }
+        else
+        {
+            printf("nothing\n");
+        }
+    }
+    else
+    {
+
+        printf("%d\n",strlen(command));
+        d = connectToServer(".steer");
+        if (send(d, command,strlen(command)-1, 0) < 0)
+        {
+            perror("send");
+            exit(EXIT_FAILURE);
+        }
+        //printf(command);
+    }
+    return change;
 }
