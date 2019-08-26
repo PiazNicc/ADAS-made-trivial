@@ -1,3 +1,3 @@
-int creaAttuatore(void (*f)());
+int crea(void (*f)());
 
-int creaSensore(int mode,void (*f)(int));
+int creaConModalita(int mode,void (*f)(int));

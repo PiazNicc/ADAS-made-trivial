@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     {
         printf("\nMacchina in moto,digitare PARCHEGGIO quando si vuole avviare la procedura apposita\n\n");
         scanf("%s", input);
+      
         while (strcmp(input, "PARCHEGGIO") != 0)
         {
             printf("\ninput non riconosciuto,digitare PARCHEGGIO per fermare la macchina\n\n");

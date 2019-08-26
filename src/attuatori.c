@@ -47,10 +47,8 @@ void steerflagHandle(int sig)
 }
 
 void dangerHandler(int sig)
-{
-    FILE *f = fopen("log/brake.log", "a");
-    fprintf(f, "ARRESTO AUTO");
-    fclose(f);
+{   brakeLog("ARRESTO AUTO\n");
+    return;
 }
 
 //quando sono finiti gli attuatori li mettiamo tutti insieme per facilitare la compilazione
@@ -119,7 +117,8 @@ void throttleControl()
 
 void brakeByWire()
 {
-    signal(SIGUSR2, sj);
+    signal(SIGUSR1, sj);
+    signal(SIGUSR2,dangerHandler);
     char *message = malloc(255);
     FILE *f = fopen("log/brake.log", "w");
     fprintf(f, __DATE__);
@@ -139,7 +138,7 @@ void brakeByWire()
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, brakeFlagHandle);
         printf("%d\n", getpid());
-        kill(getppid(), SIGUSR2);
+        kill(getppid(), SIGUSR1);
         for (;;)
         {
             if (brakeFlag == 0)

@@ -18,22 +18,35 @@
 #include "azioni.h"
 #define READ 0
 #define WRITE 1
-int speed = 0;
+#define BRAKE 2
+int pids[4];
 void killCom(int sig)
 {
     kill(0, SIGKILL);
+    exit(0);
+}
+void danger(int sig)
+{
+    kill(pids[BRAKE], SIGUSR2);
+    for (int i = 0; i < 4; i++)
+    {
+        kill(-(pids[i]), SIGKILL);
+        wait((int *)SIGCHLD);
+        printf("UCCIDO %d\n", pids[i]);
+    }
+
     exit(0);
 }
 
 void ecu(int mode)
 {
     // genero tutti i processi
-    int pids[4], speed = 0;
+    int speed = 0;
+    //signal(SIGALRM,danger);
     pids[0] = crea(throttleControl);
     pids[1] = crea(steerByWire);
     pids[2] = crea(brakeByWire);
     pids[3] = crea(frontWindshield); //SALVO BRAKE PER MANDARE SEGNALI DI TERMINAZIONE
-
     //int pidRadar = creaSensore(mode, forwardFacing);
     /* int fd[2];
     pipe(fd);
@@ -58,6 +71,7 @@ void ecu(int mode)
     char command[255];
     struct sockaddr_un client;
     int serverD, clientD;
+    signal(SIGUSR1, danger);
     signal(SIGINT, SIG_IGN);
     unsigned int len = sizeof(client);
     // close(fd[READ]);
@@ -80,6 +94,9 @@ void ecu(int mode)
         speed = ecuAction(speed, command);
         close(clientD);
     }
+    speed = 0;
+    kill(pids[BRAKE], SIGUSR2);
+
     for (int i = 0; i < 4; i++)
     {
         kill(-(pids[i]), SIGKILL);

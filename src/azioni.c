@@ -71,12 +71,12 @@ void brakeAction(char *message)
 void steerLog(char message[])
 {
     FILE *steerPunt = fopen("log/steer.log", "a");
-    char m[] = "DESTRA",m2[] = "SINISTRA";
+    char m[] = "DESTRA\n",m2[] = "SINISTRA\n";
     if (strcmp(message, m2) == 0 || strcmp(message, m) == 0)
     {
         for (int j = 0; j < 4; j++)
         {
-            fprintf(steerPunt, "STO GIRANDO A %s\n", message);
+            fprintf(steerPunt, "STO GIRANDO A %s", message);
             fflush(steerPunt);
             sleep(1);
         }
@@ -133,7 +133,7 @@ int ecuAction(int currSpeed, char *command)
 
         printf("%d\n",strlen(command));
         d = connectToServer(".steer");
-        if (send(d, command,strlen(command)-1, 0) < 0)
+        if (send(d, command,strlen(command), 0) < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);

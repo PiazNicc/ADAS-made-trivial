@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -11,6 +12,8 @@
 void frontWindshield()
 {
     {
+        char d[255];
+        strcpy(d, "PERICOLO\n");
         FILE *wscIN = fopen("input/frontCamera.data", "r");
         FILE *wscOUT = fopen("log/camera.log", "a");
         char data[255];
@@ -28,12 +31,16 @@ void frontWindshield()
         }
         while (fgets(data, sizeof(data), wscIN) != NULL)
         {
-
-            ecu = connectToServer(".ecu");
-            send(ecu, data, sizeof(data), 0);
-            close(ecu);
-            fputs(data, wscOUT);
-            fflush(wscOUT);
+            if (strcmp(data, d) == 0)
+            {
+                kill(getppid(), SIGUSR1);
+               
+            }
+             ecu = connectToServer(".ecu");
+                send(ecu, data, sizeof(data), 0);
+                close(ecu);
+                fputs(data, wscOUT);
+                fflush(wscOUT);
             sleep(10);
         }
 
@@ -49,11 +56,11 @@ void parkAssist(int mode)
     if (mode == 0)
     {
         p = fopen("/dev/urandom", "r");
-    } else
-    {
-        p = fopen("input/urandomARTIFICIALE.binary","r");
     }
-    
+    else
+    {
+        p = fopen("input/urandomARTIFICIALE.binary", "r");
+    }
 
     FILE *log = fopen("log/assist.log", "w");
     int ecuServer;

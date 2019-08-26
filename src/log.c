@@ -36,11 +36,11 @@ int throttleLog(int a)
             {
                 perror("errore in scrittura");
             }
-            /*if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
+            if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
             {
                 kill(getppid(), SIGSTOP);
                 break;
-            }*/
+            }
             a -= 5;
             fflush(fd);
             sleep(1);
@@ -56,4 +56,12 @@ void brakeLog(char *message)
     fprintf(f, "%s", message);
     fclose(f);
     sleep(1);
+}
+
+void ecuLog(char *message){
+    FILE *f = fopen("log/ecu.log", "a");
+    fprintf(f, "%s", message);
+    fclose(f);
+    sleep(1);
+
 }
