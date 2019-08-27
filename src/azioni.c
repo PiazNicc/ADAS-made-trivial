@@ -66,8 +66,7 @@ int ecuAction(int currSpeed, char *command)
 {
     FILE *log = fopen("log/ecu.log", "a");
     int change = currSpeed, inc = isNumber(command), d;
-    char m[255],p[255];
-    strcpy(p,"PERICOLO");
+    char m[255];
     char *c;
     if (inc)
     {
@@ -97,28 +96,24 @@ int ecuAction(int currSpeed, char *command)
         }
         else
         {
-            snprintf(m, sizeof(m), "NO ACTION\n");
+            snprintf(m, sizeof(m), "LA MACCHINA PROCEDE ALLA VELOCITÀ DI %d\n",currSpeed);
         }
-        fputs(m, log);
-        fflush(log);
+        ecuLog(m);
+       // fputs(m, log);
+        //fflush(log);
     }
     else
     {
-        if (strcmp(command, "PERICOLO") != 0)
+
+        d = connectToServer(".steer");
+        if (send(d, command, strlen(command), 0) < 0)
         {
-            d = connectToServer(".steer");
-            if (send(d, command, strlen(command), 0) < 0)
-            {
-                perror("send");
-                exit(EXIT_FAILURE);
-            }
-        }else
-        {
-            printf("ciao\n");
+            perror("send");
+            exit(EXIT_FAILURE);
         }
-        
-        fputs(command, log);
-        fflush(log);
+        ecuLog(command);
+        //fputs(command, log);
+        // fflush(log);
     }
     fclose(log);
     return change;
