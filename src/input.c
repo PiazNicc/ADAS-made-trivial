@@ -12,15 +12,18 @@
 #define NORMALE 0
 #define ARTIFICIALE 1
 int ecuD;
-static volatile int restart = 0;
+void failure(int sig)
+{
+    wait((int *)SIGCHLD);
+    printf("GUASTO ALLA MACCHINA,ARRESTO TOTALE\n");
+    exit(-1);
+}
 void killAll(int sig)
 {
-    kill(0, SIGKILL);
-    exit(0);
+    kill(ecuD, SIGIO);
 }
 void dangerh(int sig)
 {
-    printf("ciao\n");
     char *inp = malloc(255);
     do
     {
@@ -41,6 +44,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
     signal(SIGUSR1, dangerh);
+    signal(SIGUSR2, failure);
     char *input = malloc(255);
     if (strcmp(argv[1], "NORMALE") == 0)
     {

@@ -17,21 +17,22 @@
 #include "sensori.h"
 #include "log.h"
 #include "azioni.h"
-#define READ 0
-#define WRITE 1
+#define THROTTLE 0
+#define STEER 1
 #define BRAKE 2
-int pids[4];
-
+#define WINDSHIELD 3
+int components[4],speed = 0;
 void danger(int sig)
 {
-    kill(pids[BRAKE], SIGUSR2);
+    kill(components[BRAKE], SIGUSR2);
     for (int i = 0; i < 4; i++)
     {
-        kill(-(pids[i]), SIGSTOP);
+        kill(-(components[i]), SIGSTOP);
         // wait((int *)SIGCHLD);
-        //("UCCIDO %d\n", pids[i]);
+        //("UCCIDO %d\n", components[i]);
     }
     ecuLog("PERICOLO\n");
+    speed = 0;
     kill(getppid(), SIGUSR1);
     pause();
     // exit(0);
@@ -40,37 +41,35 @@ void restart(int sig)
 {
     for (int i = 0; i < 4; i++)
     {
-        kill(-pids[i], SIGCONT);
+        kill(-components[i], SIGCONT);
     }
     return;
 }
-void throttleFailure(int sig)
+void throttleFail(int sig)
 {
-
+    kill(getppid(),SIGUSR2);
     for (int i = 0; i < 4; i++)
     {
-        kill(-(pids[i]), SIGKILL);
+        kill(-(components[i]), SIGKILL);
         wait((int *)SIGCHLD);
     }
-    printf("ciao\n");
-    exit(0);
+    exit(-1);
 }
 
 void ecu(int mode)
 {
     // genero tutti i processi
-    int speed = 0;
     char command[255];
     struct sockaddr_un client;
     int serverD, clientD;
     unsigned int len = sizeof(client);
     signal(SIGUSR1, danger);
     signal(SIGUSR2, restart);
-    signal(SIGIO, throttleFailure);
-    pids[0] = crea(throttleControl);
-    pids[1] = crea(steerByWire);
-    pids[2] = crea(brakeByWire);
-    pids[3] = crea(frontWindshield);
+    signal(SIGIO, throttleFail);
+    components[0] = crea(throttleControl);
+    components[1] = crea(steerByWire);
+    components[2] = crea(brakeByWire);
+    components[3] = crea(frontWindshield);
     //int pidRadar = creaSensore(mode, forwardFacing);
     /*ecu si mette in ascolto per gli input */
     serverD = serverSocket(".ecu");
@@ -92,11 +91,11 @@ void ecu(int mode)
         close(clientD);
     }
     speed = 0;
-    kill(pids[BRAKE], SIGUSR2);
+    kill(components[BRAKE], SIGUSR2);
 
     for (int i = 0; i < 4; i++)
     {
-        kill(-(pids[i]), SIGKILL);
+        kill(-(components[i]), SIGKILL);
         wait((int *)SIGCHLD);
     }
     int park = creaConModalita(mode, parkAssist);

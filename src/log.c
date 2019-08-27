@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#define FAIL_CHANCE 0.00001
 int throttleLog(int a)
 {
     srand((unsigned int)time(0));
@@ -36,7 +37,7 @@ int throttleLog(int a)
                 perror("errore in scrittura");
             }
             fflush(fd);
-            if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
+            if (rand() < FAIL_CHANCE * ((double)RAND_MAX + 1.0))
             {
                 kill(getppid(), SIGIO);
                 break;
