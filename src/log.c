@@ -14,7 +14,6 @@ int throttleLog(int a)
     srand((unsigned int)time(0));
 
     FILE *fd = fopen("log/throttle.log", "a");
-    //flock(fd, LOCK_EX);
     char *ma[] = {" AUMENTO 5\n", " NO ACTION\n"};
     int len[] = {strlen(" AUMENTO 5\n"), strlen(" NO ACTION\n")};
 
@@ -36,17 +35,16 @@ int throttleLog(int a)
             {
                 perror("errore in scrittura");
             }
+            fflush(fd);
             if (rand() < 0.00001 * ((double)RAND_MAX + 1.0))
             {
-                kill(getppid(), SIGSTOP);
+                kill(getppid(), SIGIO);
                 break;
             }
             a -= 5;
-            fflush(fd);
             sleep(1);
         }
     }
-    //flock(fd,LOCK_UN);
     fclose(fd);
     return a;
 }
@@ -57,11 +55,32 @@ void brakeLog(char *message)
     fclose(f);
     sleep(1);
 }
+void steerLog(char *message)
+{
+    FILE *steerPunt = fopen("log/steer.log", "a");
+    char m[] = "DESTRA\n", m2[] = "SINISTRA\n";
+    if (strcmp(message, m2) == 0 || strcmp(message, m) == 0)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            fprintf(steerPunt, "STO GIRANDO A %s", message);
+            fflush(steerPunt);
+            sleep(1);
+        }
+    }
+    else
+    {
+        fprintf(steerPunt, "NO ACTION\n");
+        fflush(steerPunt);
+        sleep(1);
+    }
+    fclose(steerPunt);
+}
 
-void ecuLog(char *message){
+void ecuLog(char *message)
+{
     FILE *f = fopen("log/ecu.log", "a");
     fprintf(f, "%s", message);
     fclose(f);
     sleep(1);
-
 }

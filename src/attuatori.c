@@ -17,44 +17,42 @@
 #include "log.h"
 #include "azioni.h"
 
-int throttleFlag = 0;
-int brakeFlag = 0;
-int steerFlag = 0;
+static volatile int throttleFlag = 1;
+static volatile int brakeFlag = 1;
+static volatile int steerFlag = 1;
 
 void killC(int sig)
 {
     exit(EXIT_SUCCESS);
 }
-void sj(int sig)
-{
-    return;
-}
+
 
 void throttleflagHandle(int sig)
 {
-    throttleFlag = (throttleFlag + 1) % 2;
+    throttleFlag = 1-throttleFlag;
     return;
 }
 void brakeFlagHandle(int sig)
 {
-    brakeFlag = (brakeFlag + 1) % 2;
+    brakeFlag = 1-brakeFlag;
     return;
 }
 void steerflagHandle(int sig)
 {
-    steerFlag = (steerFlag + 1) % 2;
+    steerFlag = 1-steerFlag;
     return;
 }
 
 void dangerHandler(int sig)
-{   brakeLog("ARRESTO AUTO\n");
+{
+    brakeLog("ARRESTO AUTO\n");
     return;
 }
 
 //quando sono finiti gli attuatori li mettiamo tutti insieme per facilitare la compilazione
 void throttleControl()
 {
-    signal(SIGUSR2, sj);
+    signal(SIGUSR1, throttleflagHandle);
     char *message = malloc(255);
     FILE *f = fopen("log/throttle.log", "w");
     fprintf(f, __DATE__);
@@ -73,11 +71,10 @@ void throttleControl()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, throttleflagHandle);
-        printf("%d\n", getpid());
-        kill(getppid(), SIGUSR2);
+        kill(getppid(), SIGUSR1);
         for (;;)
         {
-            if (throttleFlag == 0)
+            if (throttleFlag == 1)
             {
 
                 throttleLog(0);
@@ -117,8 +114,8 @@ void throttleControl()
 
 void brakeByWire()
 {
-    signal(SIGUSR1, sj);
-    signal(SIGUSR2,dangerHandler);
+    signal(SIGUSR1, brakeFlagHandle);
+    signal(SIGUSR2, dangerHandler);
     char *message = malloc(255);
     FILE *f = fopen("log/brake.log", "w");
     fprintf(f, __DATE__);
@@ -137,11 +134,10 @@ void brakeByWire()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, brakeFlagHandle);
-        printf("%d\n", getpid());
         kill(getppid(), SIGUSR1);
         for (;;)
         {
-            if (brakeFlag == 0)
+            if (brakeFlag == 1)
             {
 
                 brakeLog("NO ACTION\n");
@@ -182,9 +178,9 @@ void brakeByWire()
 void steerByWire()
 {
 
-    signal(SIGUSR2, sj);
+    signal(SIGUSR1, brakeFlagHandle);
     char *message = malloc(10);
-    memset(message,NULL,sizeof(message));
+    memset(message, NULL, sizeof(message));
     FILE *f = fopen("log/steer.log", "w");
     fprintf(f, __DATE__);
     fclose(f);
@@ -202,11 +198,10 @@ void steerByWire()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, steerflagHandle);
-        printf("%d\n", getpid());
-        kill(getppid(), SIGUSR2);
+        kill(getppid(), SIGUSR1);
         for (;;)
         {
-            if (steerFlag == 0)
+            if (steerFlag == 1)
             {
 
                 steerLog("NO ACTION");
@@ -231,16 +226,15 @@ void steerByWire()
                 perror("impossibile connettersi");
                 exit(EXIT_FAILURE);
             }
-            if (recv(ECUclientD, message,10, 0) < 0)
+            if (recv(ECUclientD, message, 10, 0) < 0)
             {
                 perror("impossibile leggere\n");
                 exit(EXIT_FAILURE);
             }
-            printf(message);
             steerLog(message);
             close(ECUclientD);
             kill(child, SIGUSR1);
-            memset(message,0,10);
+            memset(message, 0, 10);
         }
     }
 }

@@ -5,18 +5,32 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <string.h>
+#include <sys/wait.h>
 #include "ecu.h"
 #include <sys/socket.h>
 #include "SocketConnection.h"
 #define NORMALE 0
 #define ARTIFICIALE 1
+int ecuD;
+static volatile int restart = 0;
 void killAll(int sig)
 {
     kill(0, SIGKILL);
     exit(0);
 }
+void dangerh(int sig)
+{
+    printf("ciao\n");
+    char *inp = malloc(255);
+    do
+    {   printf("macchina fermata,scrivere INIZIO per rimettere in moto\n");
+        scanf("%s", inp);
+    } while (strcmp(inp, "INIZIO") != 0);
+    kill(ecuD, SIGUSR2);
+    printf("\ndigitare PARCHEGGIO per fermare la macchina\n\n");
+}
 int main(int argc, char *argv[])
-{ //usar e pipe per comunicare con ecuServer?
+{
     int mode;
     if (argv[1] == NULL)
     {
@@ -25,8 +39,8 @@ int main(int argc, char *argv[])
     }
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
+    signal(SIGUSR1, dangerh);
     char *input = malloc(255);
-    int ecuD;
     if (strcmp(argv[1], "NORMALE") == 0)
     {
         mode = NORMALE;
@@ -47,26 +61,28 @@ int main(int argc, char *argv[])
         printf("\ninput non riconosciuto,scrivere INIZIO\n\n");
         scanf("%s", input);
     }
-
-    if (fork() == 0)
+    ecuD = fork();
+    if (ecuD < 0)
+    {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+    else if (ecuD == 0)
     {
         ecu(mode);
     }
     else
     {
-        printf("\nMacchina in moto,digitare PARCHEGGIO quando si vuole avviare la procedura apposita\n\n");
-        scanf("%s", input);
-      
-        while (strcmp(input, "PARCHEGGIO") != 0)
+        int s;
+        do
         {
-            printf("\ninput non riconosciuto,digitare PARCHEGGIO per fermare la macchina\n\n");
-            scanf("%s", input);
-        }
+            printf("\ndigitare PARCHEGGIO per fermare la macchina\n\n");
+            s = scanf("%s", input);
+        } while (strcmp(input, "PARCHEGGIO") != 0 && s == EOF);
         ecuD = connectToServer(".ecu");
-        send(ecuD, input, 255, 0);
+        send(ecuD, "PARCHEGGIO\n", 255, 0);
         close(ecuD);
         free(input);
-        printf("sto parcheggiando\n");
     }
     wait(SIGCHLD);
     exit(0);

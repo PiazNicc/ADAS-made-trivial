@@ -11,42 +11,40 @@
 #include "sensori.h"
 void frontWindshield()
 {
+    int ecu;
+    char d[255], data[255];
+    strcpy(d, "PERICOLO\n");
+    FILE *wscIN = fopen("input/frontCamera.data", "r");
+    FILE *wscOUT = fopen("log/camera.log", "w");
+    if (wscIN == NULL)
     {
-        char d[255];
-        strcpy(d, "PERICOLO\n");
-        FILE *wscIN = fopen("input/frontCamera.data", "r");
-        FILE *wscOUT = fopen("log/camera.log", "a");
-        char data[255];
-        int ecu;
-
-        if (wscIN == NULL)
+        perror("error not open fileINPUT");
+        exit(EXIT_FAILURE);
+    }
+    if (wscOUT == NULL)
+    {
+        perror("error not open fileOUTPUT");
+        exit(EXIT_FAILURE);
+    }
+    while (fgets(data, sizeof(data), wscIN) != NULL)
+    {
+        if (strcmp(data, d) == 0)
         {
-            perror("error not open fileINPUT");
-            exit(EXIT_FAILURE);
+            kill(getppid(), SIGUSR1);
         }
-        if (wscOUT == NULL)
+        else
         {
-            perror("error not open fileOUTPUT");
-            exit(EXIT_FAILURE);
-        }
-        while (fgets(data, sizeof(data), wscIN) != NULL)
-        {
-            if (strcmp(data, d) == 0)
-            {
-                kill(getppid(), SIGUSR1);
-               
-            }
-             ecu = connectToServer(".ecu");
-                send(ecu, data, sizeof(data), 0);
-                close(ecu);
-                fputs(data, wscOUT);
-                fflush(wscOUT);
+            ecu = connectToServer(".ecu");
+            send(ecu, data, sizeof(data), 0);
+            close(ecu);
+            fputs(data, wscOUT);
+            fflush(wscOUT);
             sleep(10);
         }
-
-        fclose(wscOUT);
-        fclose(wscIN);
     }
+
+    fclose(wscOUT);
+    fclose(wscIN);
 }
 void parkAssist(int mode)
 {
