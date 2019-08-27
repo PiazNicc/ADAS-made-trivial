@@ -23,11 +23,12 @@ void dangerh(int sig)
     printf("ciao\n");
     char *inp = malloc(255);
     do
-    {   printf("macchina fermata,scrivere INIZIO per rimettere in moto\n");
+    {
+        printf("macchina fermata,scrivere INIZIO per rimettere in moto\n");
         scanf("%s", inp);
     } while (strcmp(inp, "INIZIO") != 0);
     kill(ecuD, SIGUSR2);
-    printf("\ndigitare PARCHEGGIO per fermare la macchina\n\n");
+    return;
 }
 int main(int argc, char *argv[])
 {
@@ -73,17 +74,16 @@ int main(int argc, char *argv[])
     }
     else
     {
-        int s;
         do
         {
             printf("\ndigitare PARCHEGGIO per fermare la macchina\n\n");
-            s = scanf("%s", input);
+            scanf("%s", input);
         } while (strcmp(input, "PARCHEGGIO") != 0);
         ecuD = connectToServer(".ecu");
         send(ecuD, "PARCHEGGIO\n", 255, 0);
         close(ecuD);
         free(input);
     }
-    wait(SIGCHLD);
+    wait((int *)SIGCHLD);
     exit(0);
 }

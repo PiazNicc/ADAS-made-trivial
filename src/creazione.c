@@ -14,8 +14,9 @@ int crea(void (*f)())
     }
     else if (pid == 0)
     {
-        setpgid(getpid(),getpid());
+        setpgid(getpid(), getpid());
         (*f)();
+        return 0;
     }
     else
     {
@@ -23,7 +24,8 @@ int crea(void (*f)())
     }
 }
 
-int creaConModalita(int mode,void (*f)(int)){
+int creaConModalita(int mode, void (*f)(int))
+{
     int pid = fork();
     if (pid < 0)
     {
@@ -32,8 +34,9 @@ int creaConModalita(int mode,void (*f)(int)){
     }
     else if (pid == 0)
     {
-        setpgid(getpid(),getpid());
+        setpgid(getpid(), getpid());
         (*f)(mode);
+        return 0;
     }
     else
     {

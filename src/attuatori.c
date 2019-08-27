@@ -180,7 +180,6 @@ void steerByWire()
 
     signal(SIGUSR1, brakeFlagHandle);
     char *message = malloc(10);
-    memset(message, NULL, sizeof(message));
     FILE *f = fopen("log/steer.log", "w");
     fprintf(f, __DATE__);
     fclose(f);

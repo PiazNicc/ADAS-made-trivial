@@ -8,4 +8,6 @@ void brakeAction(char *message);
 
 void steer(char *message);
 
-int ecuAction(int currSpeed,char *message);
+int ecuAction(int currSpeed, char *message);
+
+int isNumber(char m[]);

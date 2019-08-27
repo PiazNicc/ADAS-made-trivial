@@ -15,6 +15,7 @@
 #include "ecu.h"
 #include "attuatori.h"
 #include "sensori.h"
+#include "log.h"
 #include "azioni.h"
 #define READ 0
 #define WRITE 1
@@ -30,6 +31,7 @@ void danger(int sig)
         // wait((int *)SIGCHLD);
         //("UCCIDO %d\n", pids[i]);
     }
+    ecuLog("PERICOLO\n");
     kill(getppid(), SIGUSR1);
     pause();
     // exit(0);

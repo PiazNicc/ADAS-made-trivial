@@ -26,7 +26,7 @@ int main()
         if (fgets(buff, sizeof(buff), f) != NULL)
         {
             rawtime = time(0);
-            timeinfo = gmtime(&rawtime);
+            timeinfo = localtime(&rawtime);
             strftime(timer, sizeof(timer), "[%Y-%m-%d %H:%M:%S]", timeinfo);
             printf("%s ", timer);
             fputs(buff, stdout);

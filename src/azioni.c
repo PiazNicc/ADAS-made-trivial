@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
+#include <ctype.h>
 #include <signal.h>
 #include <sys/socket.h>
 #include "azioni.h"
@@ -64,12 +65,13 @@ void steer(char *message)
 int ecuAction(int currSpeed, char *command)
 {
     FILE *log = fopen("log/ecu.log", "a");
-    int change = currSpeed, inc = atoi(command), d;
-    char m[255];
+    int change = currSpeed, inc = isNumber(command), d;
+    char m[255],p[255];
+    strcpy(p,"PERICOLO");
     char *c;
-    if (inc != 0)
+    if (inc)
     {
-        change = inc;
+        change = atoi(command);
 
         if (change > currSpeed)
         {
@@ -102,15 +104,35 @@ int ecuAction(int currSpeed, char *command)
     }
     else
     {
-        d = connectToServer(".steer");
-        if (send(d, command, strlen(command), 0) < 0)
+        if (strcmp(command, "PERICOLO") != 0)
         {
-            perror("send");
-            exit(EXIT_FAILURE);
+            d = connectToServer(".steer");
+            if (send(d, command, strlen(command), 0) < 0)
+            {
+                perror("send");
+                exit(EXIT_FAILURE);
+            }
+        }else
+        {
+            printf("ciao\n");
         }
+        
         fputs(command, log);
         fflush(log);
     }
     fclose(log);
     return change;
+}
+int isNumber(char m[])
+{
+    int isN = 1;
+    for (int i = 0; i < strlen(m) - 1; i++)
+    {
+        if (!isdigit(m[i]))
+        {
+            isN = 0;
+            break;
+        }
+    }
+    return isN;
 }

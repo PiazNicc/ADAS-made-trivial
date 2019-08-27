@@ -39,8 +39,8 @@ void frontWindshield()
             close(ecu);
             fputs(data, wscOUT);
             fflush(wscOUT);
-            sleep(10);
         }
+        sleep(10);
     }
 
     fclose(wscOUT);
