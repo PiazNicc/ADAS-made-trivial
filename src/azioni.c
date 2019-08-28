@@ -97,7 +97,7 @@ int ecuAction(int currSpeed, char *command)
         }
         else
         {
-            snprintf(m, sizeof(m), "LA MACCHINA PROCEDE ALLA VELOCITÀ DI %d\n", currSpeed);
+            snprintf(m, sizeof(m), "LA MACCHINA PROCEDE ALLA VELOCITÀ DI %d km/h \n", currSpeed);
         }
         ecuLog(m);
         // fputs(m, log);
@@ -135,7 +135,6 @@ int isNumber(char m[])
 
 int checkParking(unsigned char data[])
 {
-    printf("CHECK\n");
     unsigned char conf[] = {0x172A, 0xD693, 0x0, 0xBDD8, 0xFAEE, 0x4300};
     for (int i = 0; i < strlen(data) - 1; i++)
     {
