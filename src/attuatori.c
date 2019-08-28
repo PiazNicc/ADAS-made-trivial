@@ -26,20 +26,19 @@ void killC(int sig)
     exit(EXIT_SUCCESS);
 }
 
-
 void throttleflagHandle(int sig)
 {
-    throttleFlag = 1-throttleFlag;
+    throttleFlag = 1 - throttleFlag;
     return;
 }
 void brakeFlagHandle(int sig)
 {
-    brakeFlag = 1-brakeFlag;
+    brakeFlag = 1 - brakeFlag;
     return;
 }
 void steerflagHandle(int sig)
 {
-    steerFlag = 1-steerFlag;
+    steerFlag = 1 - steerFlag;
     return;
 }
 
@@ -72,6 +71,10 @@ void throttleControl()
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, throttleflagHandle);
         kill(getppid(), SIGUSR1);
+        sleep(1); 
+        /*il primo comando sarà un'accelerazione  per poter mettere in moto
+        la macchina,metto a dormire un secondo il processo 
+        per evitare problemi di sincronizzazione */
         for (;;)
         {
             if (throttleFlag == 1)
@@ -90,7 +93,6 @@ void throttleControl()
         pause();
         serverD = serverSocket(".throttle");
         listen(serverD, 5);
-
         while (1)
         {
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
@@ -153,7 +155,7 @@ void brakeByWire()
         pause();
         serverD = serverSocket(".brake");
         listen(serverD, 5);
-
+        sleep(1);
         while (1)
         {
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);

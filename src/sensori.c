@@ -31,6 +31,7 @@ void frontWindshield()
         if (strcmp(data, d) == 0)
         {
             kill(getppid(), SIGUSR1);
+            sleep(2);
         }
         else
         {
@@ -39,8 +40,8 @@ void frontWindshield()
             close(ecu);
             fputs(data, wscOUT);
             fflush(wscOUT);
+            sleep(10);
         }
-        sleep(10);
     }
 
     fclose(wscOUT);
@@ -49,8 +50,8 @@ void frontWindshield()
 void parkAssist(int mode)
 {
     FILE *p;
-    int data[4];
-    int secs = 0, i;
+    unsigned char data[4];
+    int secs = 0;
     if (mode == 0)
     {
         p = fopen("/dev/urandom", "r");
@@ -69,54 +70,75 @@ void parkAssist(int mode)
     }
     for (secs = 0; secs < 30; secs++)
     {
-        //
-        /*if (fread(data, 1, 4, p) < 4)
+
+        if (fread(data, 1, 4, p) < 4)
         {
             perror("read");
             exit(EXIT_FAILURE);
-        }*/
-        for (i = 0; i < 4; i++)
-        {
-            data[i] = getc(p);
-            fprintf(log, "%0x ", data[i]);
         }
 
-        // ecuServer = connectToServer("ecu");
-        ///if (send(ecuServer, data, strlen(data), 0) < 0)
-        //{
-        ///    perror("send");
-        // /    exit(EXIT_FAILURE);
-        // }
-        fprintf(log, "\n");
+        for (int i = 0; i < 4; i++)
+        {
+            fprintf(log, "%d ", (int)data[i]);
+        }
+        fputc('\n', log);
         fflush(log);
         sleep(1);
+        ecuServer = connectToServer(".ecu");
+        if (send(ecuServer, data, 4, 0) < 0)
+        {
+            perror("send");
+            exit(EXIT_FAILURE);
+        }
+        close(ecuServer);
     }
+    ecuServer = connectToServer(".ecu");
+    if (send(ecuServer, "FINE\n", 6, 0) < 0)
+    {
+        perror("send");
+        exit(EXIT_FAILURE);
+    }
+    close(ecuServer);
     fclose(log);
     fclose(p);
+    pause();
 }
 void forwardFacing(int mode)
 {
-    char data[24];
-    FILE *p = fopen("/dev/random", "r");
+    unsigned char data[24];
+    FILE *p;
     FILE *log = fopen("log/radar.log", "a");
     int ecuServer;
+    if (mode == 0)
+    {
+        p = fopen("/dev/urandom", "r");
+    }
+    else
+    {
+        p = fopen("input/urandomARTIFICIALE.binary", "r");
+    }
+    if (p == NULL || log == NULL)
+    {
+        perror("errore in apertura file");
+        exit(EXIT_FAILURE);
+    }
     for (;;)
     {
         if (fread(data, 1, 24, p) == 24)
         {
-            ecuServer = connectToServer("ecu");
-            if (send(ecuServer, data, strlen(data), 0) < 0)
+            ecuServer = connectToServer(".ecu");
+            if (send(ecuServer, data, 24, 0) < 0)
             {
                 perror("send");
                 exit(EXIT_FAILURE);
             }
-            if (fwrite(data, 1, 4, log) < 4)
-            {
-                perror("write");
-                exit(EXIT_FAILURE);
-            };
             close(ecuServer);
-            fprintf(log, "\n");
+            for (int i = 0; i < 24; i++)
+            {
+                fprintf(log, "%d ", (int)data[i]);
+            }
+            fputc('\n', log);
+
             fflush(log);
         }
         sleep(2);
@@ -124,9 +146,17 @@ void forwardFacing(int mode)
 }
 void surroundViews(int mode)
 {
-    char data[16];
-    FILE *p = fopen("/dev/urandom", "r");
-    FILE *log = fopen("log/cameras.log", "a");
+    unsigned char data[16];
+    FILE *p;
+    FILE *log = fopen("log/cameras.log", "w");
+    if (mode == 0)
+    {
+        p = fopen("/dev/urandom", "r");
+    }
+    else
+    {
+        p = fopen("input/urandomARTIFICIALE.binary", "r");
+    }
     int ecuServer;
     for (int secs = 0; secs < 30; secs++)
     {
@@ -136,50 +166,50 @@ void surroundViews(int mode)
             perror("read");
             exit(EXIT_FAILURE);
         }
-        if (fwrite(data, 1, 16, log) < 16)
-        {
-            perror("write");
-            exit(EXIT_FAILURE);
-        }
-        ecuServer = connectToServer("ecu");
+        ecuServer = connectToServer(".ecu");
         if (send(ecuServer, data, strlen(data), 0) < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);
         }
-        fprintf(log, "\n");
+        for (int i = 0; i < 16; i++)
+        {
+            fprintf(log, "%d ", (int)data[i]);
+        }
+        fputc('\n', log);
+        fflush(log);
         sleep(1);
     }
     fclose(log);
     fclose(p);
+    pause();
 }
 
 void blindSpot(int mode)
 {
-    char data[8];
+    unsigned char data[8];
     FILE *p = fopen("/dev/urandom", "r");
     FILE *log = fopen("log/spot.log", "a");
     int ecuServer;
     for (int secs = 0; secs < 4; secs++)
     {
-        //
+
         if (fread(data, 1, 8, p) < 8)
         {
             perror("read");
             exit(EXIT_FAILURE);
         }
-        if (fwrite(data, 1, 8, log) < 8)
-        {
-            perror("write");
-            exit(EXIT_FAILURE);
-        }
-        ecuServer = connectToServer("ecu");
+        /** ecuServer = connectToServer("ecu");
         if (send(ecuServer, data, strlen(data), 0) < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);
+        }*/
+        for (int i = 0; i < 8; i++)
+        {
+            fprintf(log, "%d ", (int)data[i]);
         }
-        fprintf(log, "\n");
+        fflush(log);
         sleep(1);
     }
     fclose(log);

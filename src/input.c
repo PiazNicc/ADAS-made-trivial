@@ -15,7 +15,6 @@ int ecuD;
 void failure(int sig)
 {
     wait((int *)SIGCHLD);
-    printf("GUASTO ALLA MACCHINA,ARRESTO TOTALE\n");
     exit(-1);
 }
 void killAll(int sig)
@@ -24,28 +23,25 @@ void killAll(int sig)
 }
 void dangerh(int sig)
 {
-    char *inp = malloc(255);
+    char *inp = malloc(128);
     do
     {
-        printf("macchina fermata,scrivere INIZIO per rimettere in moto\n");
-        scanf("%s", inp);
+        printf("\nmacchina fermata,scrivere INIZIO per rimettere in moto\n");
+        scanf(" %s",inp);
+
     } while (strcmp(inp, "INIZIO") != 0);
     kill(ecuD, SIGUSR2);
+    printf("Macchina di nuovo in moto,premere INVIO due volte per tornare all'interfaccia di comando\n\n");
     return;
 }
 int main(int argc, char *argv[])
 {
     int mode;
-    if (argv[1] == NULL)
-    {
-        printf("NESSUNA MODALITÀ SELEZIONATA");
-        exit(-1);
-    }
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
     signal(SIGUSR1, dangerh);
     signal(SIGUSR2, failure);
-    char *input = malloc(255);
+    char *input = malloc(128);
     if (strcmp(argv[1], "NORMALE") == 0)
     {
         mode = NORMALE;
@@ -80,13 +76,15 @@ int main(int argc, char *argv[])
     {
         do
         {
-            printf("\ndigitare PARCHEGGIO per fermare la macchina\n\n");
-            scanf("%s", input);
+            
+            printf("\ndigitare PARCHEGGIO per fermare la macchina\n");
+            scanf(" %s", input);
         } while (strcmp(input, "PARCHEGGIO") != 0);
         ecuD = connectToServer(".ecu");
         send(ecuD, "PARCHEGGIO\n", 255, 0);
         close(ecuD);
         free(input);
+        input = NULL;
     }
     wait((int *)SIGCHLD);
     exit(0);

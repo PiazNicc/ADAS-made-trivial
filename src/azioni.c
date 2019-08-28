@@ -7,6 +7,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <signal.h>
+#include <sys/un.h>
 #include <sys/socket.h>
 #include "azioni.h"
 #include "log.h"
@@ -96,10 +97,10 @@ int ecuAction(int currSpeed, char *command)
         }
         else
         {
-            snprintf(m, sizeof(m), "LA MACCHINA PROCEDE ALLA VELOCITÀ DI %d\n",currSpeed);
+            snprintf(m, sizeof(m), "LA MACCHINA PROCEDE ALLA VELOCITÀ DI %d\n", currSpeed);
         }
         ecuLog(m);
-       // fputs(m, log);
+        // fputs(m, log);
         //fflush(log);
     }
     else
@@ -130,4 +131,21 @@ int isNumber(char m[])
         }
     }
     return isN;
+}
+
+int checkParking(unsigned char data[])
+{
+    printf("CHECK\n");
+    unsigned char conf[] = {0x172A, 0xD693, 0x0, 0xBDD8, 0xFAEE, 0x4300};
+    for (int i = 0; i < strlen(data) - 1; i++)
+    {
+        for (int j = 0; j < 6; j++)
+        {
+            if ((int)data[i] == (int)conf[j]){
+                return 0;
+            }
+        }
+        
+    }
+    return 1;
 }

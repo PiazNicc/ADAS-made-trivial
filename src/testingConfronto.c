@@ -10,16 +10,19 @@ int forwardFacing(unsigned char *data)
 
 void main()
 {
-	unsigned char data[24];
+	unsigned char data[] = {0x134D, 0xFE43, 0x172A};
 	FILE *p = fopen("/dev/random", "r");
-	fread(data, 1, 24, p);
-	unsigned char conf[] = {0xA00F, 0xB072, 0x2FA8, 0x8359, 0xCE23};
+	//fread(data, 1, 24, p);
+
+	unsigned char conf[] = {0x172A, 0xD693, 0x0, 0xBDD8, 0xFAEE, 0x4300};
 	for (int i = 0; i < sizeof data / sizeof data[0]; i++)
 	{
-		char *f = memchr(conf, data[i], sizeof(conf));
-		if (f != NULL)
+		for (int j = 0; j < 6; j++)
 		{
-			printf("ciao\n");
+			if (data[i] == conf[j])
+			{
+				printf("ciao\n");
+			}
 		}
 	}
 	return 0;
