@@ -34,7 +34,7 @@ int main()
 
         sleep(1);
     }
-    printf("\n*************** MACCHINA PARCHEGGIATA, QUESTA FINESTRA SI CHIUDERÀ FRA 5 SECONDI**********\n");
+    printf("\n*************** PARCHEGGIO IN CORSO, QUESTA FINESTRA SI CHIUDERÀ FRA 5 SECONDI**********\n");
     sleep(5);
     return 0;
 }
