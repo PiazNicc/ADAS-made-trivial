@@ -16,12 +16,13 @@ int main()
     FILE *f = fopen("log/ecu.log", "w+");
     fprintf(f,"MACCHINA ACCESA\n");
     fflush(f);
+    fseek(f,0,SEEK_SET);
     if (f == NULL)
     {
         perror("impossibile aprire il file");
     }
 
-    while (strcmp(buff, "PARCHEGGIO\n") != 0)
+    while (strcmp(buff, "PARCHEGGIO\n") != 0 && strcmp(buff, "GUASTO TECNICO,ARRESTO TOTALE\n") != 0 )
     {
         if (fgets(buff, sizeof(buff), f) != NULL)
         {
@@ -34,7 +35,7 @@ int main()
 
         sleep(1);
     }
-    printf("\n*************** PARCHEGGIO IN CORSO, QUESTA FINESTRA SI CHIUDERÀ FRA 5 SECONDI**********\n");
+    printf("\n*************** MACCHINA ARRESTATA, QUESTA FINESTRA SI CHIUDERÀ FRA 5 SECONDI**********\n");
     sleep(5);
     return 0;
 }

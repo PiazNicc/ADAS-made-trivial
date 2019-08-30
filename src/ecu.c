@@ -44,7 +44,6 @@ void restart(int sig)
 }
 void throttleFail(int sig)
 {
-    kill(getppid(), SIGUSR2);
     for (int i = 0; i < TOTAL_COMPONENTS; i++)
     {
         kill(-(components[i]), SIGKILL);
@@ -63,7 +62,7 @@ void ecu(int mode)
     unsigned int len = sizeof(client);
     signal(SIGUSR1, danger);
     signal(SIGUSR2, restart);
-    signal(SIGIO, throttleFail);
+    signal(SIGABRT, throttleFail);
     components[0] = crea(throttleControl);
     components[1] = crea(steerByWire);
     components[2] = crea(brakeByWire);
@@ -98,8 +97,9 @@ void ecu(int mode)
     unsigned char *v = malloc(255);
     int isPark = 1;
     int park = creaConModalita(mode, parkAssist);
-   // int surr = creaConModalita(mode, surroundViews);
-    while (strcmp(v, "FINE\n") != 0)
+    //components[4] = park;
+     int surr = creaConModalita(mode, surroundViews);
+    while (strcmp((char *)v, "FINE\n") != 0)
     {
         clientD = accept(serverD, (struct sockaddr *)&client, &len);
         if (clientD < 0)
@@ -118,15 +118,15 @@ void ecu(int mode)
         {
             kill(park, SIGKILL);
             wait((int *)SIGCHLD);
-            ///kill(surr, SIGKILL);
-            //wait((int *)SIGCHLD);
+            kill(surr, SIGKILL);
+            wait((int *)SIGCHLD);
             park = creaConModalita(mode, parkAssist);
-            //surr = creaConModalita(mode, surroundViews);
+            surr = creaConModalita(mode, surroundViews);
         }
     }
     kill(park, SIGKILL);
     wait((int *)SIGCHLD);
-  //  kill(surr, SIGKILL);
-    //wait((int *)SIGCHLD);
+    kill(surr, SIGKILL);
+    wait((int *)SIGCHLD);
     exit(0);
 }

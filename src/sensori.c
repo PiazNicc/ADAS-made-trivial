@@ -16,14 +16,9 @@ void frontWindshield()
     strcpy(d, "PERICOLO\n");
     FILE *wscIN = fopen("input/frontCamera.data", "r");
     FILE *wscOUT = fopen("log/camera.log", "w");
-    if (wscIN == NULL)
+    if (wscIN == NULL || wscOUT == NULL)
     {
         perror("error not open fileINPUT");
-        exit(EXIT_FAILURE);
-    }
-    if (wscOUT == NULL)
-    {
-        perror("error not open fileOUTPUT");
         exit(EXIT_FAILURE);
     }
     while (fgets(data, sizeof(data), wscIN) != NULL)
@@ -31,6 +26,8 @@ void frontWindshield()
         if (strcmp(data, d) == 0)
         {
             kill(getppid(), SIGUSR1);
+            fputs(data, wscOUT);
+            fflush(wscOUT);
             sleep(2);
         }
         else
@@ -43,9 +40,9 @@ void frontWindshield()
             sleep(10);
         }
     }
-
     fclose(wscOUT);
     fclose(wscIN);
+    pause();
 }
 void parkAssist(int mode)
 {
@@ -191,26 +188,31 @@ void blindSpot(int mode)
     FILE *p = fopen("/dev/urandom", "r");
     FILE *log = fopen("log/spot.log", "a");
     int ecuServer;
-    for (int secs = 0; secs < 4; secs++)
+    for (;;)
     {
 
-        if (fread(data, 1, 8, p) < 8)
+        for (int secs = 0; secs < 4; secs++)
         {
-            perror("read");
-            exit(EXIT_FAILURE);
-        }
-        /** ecuServer = connectToServer("ecu");
+
+            if (fread(data, 1, 8, p) < 8)
+            {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
+            /** ecuServer = connectToServer("ecu");
         if (send(ecuServer, data, strlen(data), 0) < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);
         }*/
-        for (int i = 0; i < 8; i++)
-        {
-            fprintf(log, "%d ", (int)data[i]);
+            for (int i = 0; i < 8; i++)
+            {
+                fprintf(log, "%d ", (int)data[i]);
+            }
+            fflush(log);
+            sleep(1);
         }
-        fflush(log);
-        sleep(1);
+        kill(getpid(), SIGSTOP); //aspetta segnale da steer
     }
     fclose(log);
     fclose(p);

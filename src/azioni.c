@@ -105,16 +105,18 @@ int ecuAction(int currSpeed, char *command)
     }
     else
     {
-
-        d = connectToServer(".steer");
-        if (send(d, command, strlen(command), 0) < 0)
+        if (currSpeed > 0) //STERZATA NON HA SENSO SE MACCHINA FERMA
         {
-            perror("send");
-            exit(EXIT_FAILURE);
+            d = connectToServer(".steer");
+            if (send(d, command, strlen(command), 0) < 0)
+            {
+                perror("send");
+                exit(EXIT_FAILURE);
+            }
+            ecuLog(command);
+            //fputs(command, log);
+            // fflush(log);
         }
-        ecuLog(command);
-        //fputs(command, log);
-        // fflush(log);
     }
     fclose(log);
     return change;
@@ -136,15 +138,15 @@ int isNumber(char m[])
 int checkParking(unsigned char data[])
 {
     unsigned char conf[] = {0x172A, 0xD693, 0x0, 0xBDD8, 0xFAEE, 0x4300};
-    for (int i = 0; i < strlen(data) - 1; i++)
+    for (int i = 0; i < strlen((char *)data) - 1; i++)
     {
         for (int j = 0; j < 6; j++)
         {
-            if ((int)data[i] == (int)conf[j]){
+            if ((int)data[i] == (int)conf[j])
+            {
                 return 0;
             }
         }
-        
     }
     return 1;
 }

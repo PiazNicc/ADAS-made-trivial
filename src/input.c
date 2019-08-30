@@ -12,14 +12,11 @@
 #define NORMALE 0
 #define ARTIFICIALE 1
 int ecuD;
-void failure(int sig)
-{
-    wait((int *)SIGCHLD);
-    exit(-1);
-}
 void killAll(int sig)
 {
-    kill(ecuD, SIGIO);
+    kill(ecuD, SIGABRT);
+    wait((int *)SIGCHLD);
+    exit(-1);
 }
 void dangerh(int sig)
 {
@@ -27,7 +24,7 @@ void dangerh(int sig)
     do
     {
         printf("\nmacchina fermata,scrivere INIZIO per rimettere in moto\n");
-        scanf(" %s",inp);
+        scanf(" %s", inp);
 
     } while (strcmp(inp, "INIZIO") != 0);
     kill(ecuD, SIGUSR2);
@@ -40,7 +37,6 @@ int main(int argc, char *argv[])
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
     signal(SIGUSR1, dangerh);
-    signal(SIGUSR2, failure);
     char *input = malloc(128);
     if (strcmp(argv[1], "NORMALE") == 0)
     {
@@ -76,7 +72,7 @@ int main(int argc, char *argv[])
     {
         do
         {
-            
+
             printf("\ndigitare PARCHEGGIO per fermare la macchina\n");
             scanf(" %s", input);
         } while (strcmp(input, "PARCHEGGIO") != 0);
