@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include "creazione.h"
+#include "sensori.h"
 #include "SocketConnection.h"
 #include "attuatori.h"
 #include "log.h"
@@ -55,6 +57,9 @@ void throttleControl()
     char *message = malloc(255);
     FILE *f = fopen("log/throttle.log", "w");
     fprintf(f, __DATE__);
+    fputc(' ', f);
+    fprintf(f, __TIME__);
+    fputc('\n', f);
     fclose(f);
     int serverD, ECUclientD;
     unsigned int clientLen;
@@ -70,8 +75,7 @@ void throttleControl()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, throttleflagHandle);
-        kill(getppid(), SIGUSR1);
-        sleep(1); 
+        sleep(1);
         /*il primo comando sarà un'accelerazione  per poter mettere in moto
         la macchina,metto a dormire un secondo il processo 
         per evitare problemi di sincronizzazione */
@@ -90,7 +94,6 @@ void throttleControl()
     }
     else
     {
-        pause();
         serverD = serverSocket(".throttle");
         listen(serverD, 5);
         while (1)
@@ -121,6 +124,9 @@ void brakeByWire()
     char *message = malloc(255);
     FILE *f = fopen("log/brake.log", "w");
     fprintf(f, __DATE__);
+    fputc(' ', f);
+    fprintf(f, __TIME__);
+    fputc('\n', f);
     fclose(f);
     int serverD, ECUclientD;
     unsigned int clientLen;
@@ -136,7 +142,6 @@ void brakeByWire()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, brakeFlagHandle);
-        kill(getppid(), SIGUSR1);
         for (;;)
         {
             if (brakeFlag == 1)
@@ -152,7 +157,6 @@ void brakeByWire()
     }
     else
     {
-        pause();
         serverD = serverSocket(".brake");
         listen(serverD, 5);
         sleep(1);
@@ -177,18 +181,22 @@ void brakeByWire()
     }
 }
 
-void steerByWire()
+void steerByWire(int mode)
 {
 
     signal(SIGUSR1, brakeFlagHandle);
     char *message = malloc(10);
     FILE *f = fopen("log/steer.log", "w");
     fprintf(f, __DATE__);
+    fputc(' ', f);
+    fprintf(f, __TIME__);
+    fputc('\n', f);
     fclose(f);
     int serverD, ECUclientD;
     unsigned int clientLen;
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
+    //int blind = creaConModalita(mode,blindSpot);
     int child = fork();
     if (child < 0)
     {
@@ -199,7 +207,6 @@ void steerByWire()
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
         signal(SIGUSR1, steerflagHandle);
-        kill(getppid(), SIGUSR1);
         for (;;)
         {
             if (steerFlag == 1)
@@ -215,7 +222,6 @@ void steerByWire()
     }
     else
     {
-        pause();
         serverD = serverSocket(".steer");
         listen(serverD, 5);
         while (1)

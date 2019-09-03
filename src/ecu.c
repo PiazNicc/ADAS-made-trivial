@@ -22,13 +22,11 @@
 #define TOTAL_COMPONENTS 4
 
 int components[TOTAL_COMPONENTS], speed = 0;
+pid_t park, surr;
 void danger(int sig)
 {
     kill(components[BRAKE], SIGUSR2);
-    for (int i = 0; i < TOTAL_COMPONENTS; i++)
-    {
-        kill(-(components[i]), SIGSTOP);
-    }
+    kill(components[WINDSHIELD], SIGSTOP);
     ecuLog("PERICOLO,MACCHINA FERMATA\n");
     speed = 0;
     kill(getppid(), SIGUSR1);
@@ -36,10 +34,7 @@ void danger(int sig)
 }
 void restart(int sig)
 {
-    for (int i = 0; i < TOTAL_COMPONENTS; i++)
-    {
-        kill(-components[i], SIGCONT);
-    }
+    kill(components[WINDSHIELD], SIGCONT);
     return;
 }
 void throttleFail(int sig)
@@ -52,6 +47,14 @@ void throttleFail(int sig)
     ecuLog("GUASTO TECNICO,ARRESTO TOTALE\n");
     exit(-1);
 }
+void endParking(int sig)
+{
+    kill(park, SIGKILL);
+    wait((int *)SIGCHLD);
+    kill(surr, SIGKILL);
+    wait((int *)SIGCHLD);
+    exit(EXIT_SUCCESS);
+}
 
 void ecu(int mode)
 {
@@ -63,8 +66,9 @@ void ecu(int mode)
     signal(SIGUSR1, danger);
     signal(SIGUSR2, restart);
     signal(SIGABRT, throttleFail);
+    signal(SIGALRM, endParking);
     components[0] = crea(throttleControl);
-    components[1] = crea(steerByWire);
+    components[1] = creaConModalita(mode, steerByWire);
     components[2] = crea(brakeByWire);
     components[3] = crea(frontWindshield);
     /*ecu si mette in ascolto per gli input */
@@ -86,6 +90,16 @@ void ecu(int mode)
         speed = ecuAction(speed, command);
         close(clientD);
     }
+    char m[255];
+    snprintf(m, sizeof(m), "FRENO %d\n", speed);
+    int d = connectToServer(".brake");
+    if (send(d, m, sizeof(m), 0) < 0)
+    {
+        perror("send");
+        exit(EXIT_FAILURE);
+    }
+    close(d);
+    sleep(speed / 5);
     speed = 0;
     kill(components[BRAKE], SIGUSR2);
 
@@ -96,10 +110,10 @@ void ecu(int mode)
     }
     unsigned char *v = malloc(255);
     int isPark = 1;
-    int park = creaConModalita(mode, parkAssist);
-    //components[4] = park;
-     int surr = creaConModalita(mode, surroundViews);
-    while (strcmp((char *)v, "FINE\n") != 0)
+    park = creaConModalita(mode, parkAssist);
+    surr = creaConModalita(mode, surroundViews);
+    alarm(30);
+    while (1)
     {
         clientD = accept(serverD, (struct sockaddr *)&client, &len);
         if (clientD < 0)
@@ -124,9 +138,11 @@ void ecu(int mode)
             surr = creaConModalita(mode, surroundViews);
         }
     }
-    kill(park, SIGKILL);
-    wait((int *)SIGCHLD);
-    kill(surr, SIGKILL);
-    wait((int *)SIGCHLD);
+    int wpid;
+    //aspetta uscita dei sensori di parcheggio
+    while (wpid > 0)
+    {
+        wpid = wait((int *)SIGCHLD);
+    }
     exit(0);
 }

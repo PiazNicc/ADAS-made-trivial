@@ -33,7 +33,11 @@ void frontWindshield()
         else
         {
             ecu = connectToServer(".ecu");
-            send(ecu, data, sizeof(data), 0);
+            if (send(ecu, data, sizeof(data), 0) < 0)
+            {
+                perror("send");
+                exit(EXIT_FAILURE);
+            }
             close(ecu);
             fputs(data, wscOUT);
             fflush(wscOUT);

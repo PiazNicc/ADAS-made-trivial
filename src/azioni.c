@@ -142,7 +142,7 @@ int checkParking(unsigned char data[])
     {
         for (int j = 0; j < 6; j++)
         {
-            if ((int)data[i] == (int)conf[j])
+            if (data[i] == conf[j])
             {
                 return 0;
             }

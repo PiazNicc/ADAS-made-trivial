@@ -28,7 +28,7 @@ int main()
         {
             rawtime = time(0);
             timeinfo = localtime(&rawtime);
-            strftime(timer, sizeof(timer), "[%Y-%m-%d %H:%M:%S]", timeinfo);
+            strftime(timer, sizeof(timer), "[%d-%m-%Y %H:%M:%S]", timeinfo);
             printf("%s ", timer);
             fputs(buff, stdout);
         }

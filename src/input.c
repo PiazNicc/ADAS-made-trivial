@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
         {
 
             printf("\ndigitare PARCHEGGIO per fermare la macchina\n");
-            scanf(" %s", input);
+            scanf("%s", input);
         } while (strcmp(input, "PARCHEGGIO") != 0);
         ecuD = connectToServer(".ecu");
         send(ecuD, "PARCHEGGIO\n", 255, 0);
