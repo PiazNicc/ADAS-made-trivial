@@ -42,11 +42,8 @@ void decreaseSpeed(int amount)
     while (amount != 0)
     {
 
-        fwrite("DECREMENTO 5\n", 1, len, f);
+        brakeLog("DECREMENTO 5\n");
         amount = amount - 5;
-        fflush(f);
-
-        sleep(1);
     }
     fclose(f);
 }

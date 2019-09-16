@@ -89,7 +89,7 @@ void throttleControl()
             else
             {
                 pause();
-                sleep(1); //previene problemi per accelerazioni consecutive
+                
             }
         }
     }
@@ -114,6 +114,7 @@ void throttleControl()
             throttleAction(message);
             close(ECUclientD);
             kill(child, SIGUSR1);
+            sleep(1); //previene problemi per accelerazioni consecutive
         }
     }
 }
@@ -153,7 +154,7 @@ void brakeByWire()
             else
             {
                 pause();
-                sleep(1); //previene problemi per frenate consecutive
+                
             }
         }
     }
@@ -179,6 +180,7 @@ void brakeByWire()
             brakeAction(message);
             close(ECUclientD);
             kill(child, SIGUSR1);
+            sleep(1); //previene problemi per frenate consecutive
         }
     }
 }
