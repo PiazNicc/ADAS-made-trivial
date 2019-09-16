@@ -93,16 +93,7 @@ void parkAssist(int mode)
         }
         close(ecuServer);
     }
-    ecuServer = connectToServer(".ecu");
-    if (send(ecuServer, "FINE\n", 6, 0) < 0)
-    {
-        perror("send");
-        exit(EXIT_FAILURE);
-    }
-    close(ecuServer);
-    fclose(log);
-    fclose(p);
-    pause();
+   exit(EXIT_FAILURE); //should never run
 }
 void forwardFacing(int mode)
 {
@@ -144,6 +135,7 @@ void forwardFacing(int mode)
         }
         sleep(2);
     }
+    exit(EXIT_FAILURE); //should never run
 }
 void surroundViews(int mode)
 {
@@ -186,7 +178,7 @@ void surroundViews(int mode)
         fflush(log);
         sleep(1);
     }
-   exit(EXIT_FAILURE); //should not run
+   exit(EXIT_FAILURE); //should never run
 }
 
 void blindSpot(int mode)
@@ -221,6 +213,5 @@ void blindSpot(int mode)
         }
         kill(getpid(), SIGSTOP); //aspetta segnale da steer
     }
-    fclose(log);
-    fclose(p);
+    exit(EXIT_FAILURE); //should never run
 }
