@@ -18,7 +18,7 @@ void frontWindshield()
     FILE *wscOUT = fopen("log/camera.log", "w");
     if (wscIN == NULL || wscOUT == NULL)
     {
-        perror("error not open fileINPUT");
+        perror("fileOpen");
         exit(EXIT_FAILURE);
     }
     while (fgets(data, sizeof(data), wscIN) != NULL)
@@ -69,7 +69,7 @@ void parkAssist(int mode)
         perror("errore in apertura file");
         exit(EXIT_FAILURE);
     }
-    for (secs = 0; secs < 30; secs++)
+    for (;;)
     {
 
         if (fread(data, 1, 4, p) < 4)
@@ -158,8 +158,13 @@ void surroundViews(int mode)
     {
         p = fopen("input/urandomARTIFICIALE.binary", "r");
     }
+    if (p == NULL || log == NULL)
+    {
+        perror("errore in apertura file");
+        exit(EXIT_FAILURE);
+    }
     int ecuServer;
-    for (int secs = 0; secs < 30; secs++)
+    for (;;)
     {
         //
         if (fread(data, 1, 16, p) < 16)
@@ -181,9 +186,7 @@ void surroundViews(int mode)
         fflush(log);
         sleep(1);
     }
-    fclose(log);
-    fclose(p);
-    pause();
+   exit(EXIT_FAILURE); //should not run
 }
 
 void blindSpot(int mode)

@@ -108,20 +108,22 @@ void ecu(int mode)
         kill(-(components[i]), SIGKILL);
         wait((int *)SIGCHLD);
     }
-    unsigned char *v = malloc(255);
+    unsigned char v[16];
     int isPark = 1;
+    signal(SIGABRT,endParking);
     park = creaConModalita(mode, parkAssist);
     surr = creaConModalita(mode, surroundViews);
     alarm(30);
     while (1)
     {
+        memset(v,'\0',16);
         clientD = accept(serverD, (struct sockaddr *)&client, &len);
         if (clientD < 0)
         {
             perror("accept");
             exit(EXIT_FAILURE);
         }
-        if (recv(clientD, v, 255, 0) < 0)
+        if (recv(clientD, v, sizeof v, 0) < 0)
         {
             perror("receive");
             exit(EXIT_FAILURE);
@@ -138,11 +140,5 @@ void ecu(int mode)
             surr = creaConModalita(mode, surroundViews);
         }
     }
-    int wpid;
-    //aspetta uscita dei sensori di parcheggio
-    while (wpid > 0)
-    {
-        wpid = wait((int *)SIGCHLD);
-    }
-    exit(0);
+    exit(EXIT_FAILURE); //should never run
 }

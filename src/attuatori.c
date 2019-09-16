@@ -89,6 +89,7 @@ void throttleControl()
             else
             {
                 pause();
+                sleep(1); //previene problemi per accelerazioni consecutive
             }
         }
     }
@@ -152,6 +153,7 @@ void brakeByWire()
             else
             {
                 pause();
+                sleep(1); //previene problemi per frenate consecutive
             }
         }
     }
