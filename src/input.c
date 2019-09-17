@@ -28,15 +28,16 @@ void dangerh(int sig)
 
     } while (strcmp(inp, "INIZIO") != 0);
     kill(ecuD, SIGUSR2);
-    printf("Macchina di nuovo in moto,premere INVIO due volte per tornare all'interfaccia di comando\n\n");
+    printf("Macchina di nuovo in moto,premere INVIO due volte per tornare all'interfaccia di comando\n\n"); 
     return;
 }
 int main(int argc, char *argv[])
 {
     int mode;
+    /*uccide tutti i processo attivi in caso di errori o interruzioni*/
     signal(SIGINT, killAll);
     signal(SIGSEGV, killAll);
-    signal(SIGUSR1, dangerh);
+    signal(SIGUSR1, dangerh);//gestione pericolo
     char *input = malloc(128);
     if (strcmp(argv[1], "NORMALE") == 0)
     {
@@ -82,6 +83,6 @@ int main(int argc, char *argv[])
         free(input);
         input = NULL;
     }
-    wait((int *)SIGCHLD);
+    wait((int *)SIGCHLD); //aspetta la fine del parcheggio 
     exit(0);
 }

@@ -52,7 +52,6 @@ void parkAssist(int mode)
 {
     FILE *p;
     unsigned char data[4];
-    int secs = 0;
     if (mode == 0)
     {
         p = fopen("/dev/urandom", "r");
@@ -95,48 +94,7 @@ void parkAssist(int mode)
     }
    exit(EXIT_FAILURE); //should never run
 }
-void forwardFacing(int mode)
-{
-    unsigned char data[24];
-    FILE *p;
-    FILE *log = fopen("log/radar.log", "a");
-    int ecuServer;
-    if (mode == 0)
-    {
-        p = fopen("/dev/urandom", "r");
-    }
-    else
-    {
-        p = fopen("input/urandomARTIFICIALE.binary", "r");
-    }
-    if (p == NULL || log == NULL)
-    {
-        perror("errore in apertura file");
-        exit(EXIT_FAILURE);
-    }
-    for (;;)
-    {
-        if (fread(data, 1, 24, p) == 24)
-        {
-            ecuServer = connectToServer(".ecu");
-            if (send(ecuServer, data, 24, 0) < 0)
-            {
-                perror("send");
-                exit(EXIT_FAILURE);
-            }
-            close(ecuServer);
-            for (int i = 0; i < 24; i++)
-            {
-                fprintf(log, "%d ", (int)data[i]);
-            }
-            fputc('\n', log);
 
-            fflush(log);
-        }
-        sleep(2);
-    }
-    exit(EXIT_FAILURE); //should never run
-}
 void surroundViews(int mode)
 {
     unsigned char data[16];
@@ -165,7 +123,7 @@ void surroundViews(int mode)
             exit(EXIT_FAILURE);
         }
         ecuServer = connectToServer(".ecu");
-        if (send(ecuServer, data, strlen(data), 0) < 0)
+        if (send(ecuServer, data, sizeof data, 0) < 0)
         {
             perror("send");
             exit(EXIT_FAILURE);
@@ -181,37 +139,3 @@ void surroundViews(int mode)
    exit(EXIT_FAILURE); //should never run
 }
 
-void blindSpot(int mode)
-{
-    unsigned char data[8];
-    FILE *p = fopen("/dev/urandom", "r");
-    FILE *log = fopen("log/spot.log", "a");
-    int ecuServer;
-    for (;;)
-    {
-
-        for (int secs = 0; secs < 4; secs++)
-        {
-
-            if (fread(data, 1, 8, p) < 8)
-            {
-                perror("read");
-                exit(EXIT_FAILURE);
-            }
-            /** ecuServer = connectToServer("ecu");
-        if (send(ecuServer, data, strlen(data), 0) < 0)
-        {
-            perror("send");
-            exit(EXIT_FAILURE);
-        }*/
-            for (int i = 0; i < 8; i++)
-            {
-                fprintf(log, "%d ", (int)data[i]);
-            }
-            fflush(log);
-            sleep(1);
-        }
-        kill(getpid(), SIGSTOP); //aspetta segnale da steer
-    }
-    exit(EXIT_FAILURE); //should never run
-}

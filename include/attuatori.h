@@ -1,3 +1,3 @@
 void brakeByWire();
-void steerByWire(int mode);
+void steerByWire();
 void throttleControl();

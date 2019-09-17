@@ -11,4 +11,5 @@ void steer(char *message);
 int ecuAction(int currSpeed, char *message);
 
 int isNumber(char m[]);
+
 int checkParking(unsigned char data[]);

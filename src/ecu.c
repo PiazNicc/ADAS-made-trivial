@@ -21,16 +21,16 @@
 #define WINDSHIELD 3
 #define TOTAL_COMPONENTS 4
 
-int components[TOTAL_COMPONENTS], speed = 0;
-pid_t park, surr;
+int speed = 0;
+pid_t components[TOTAL_COMPONENTS],park, surr;
 void danger(int sig)
 {
     kill(components[BRAKE], SIGUSR2);
-    kill(components[WINDSHIELD], SIGSTOP);
+    kill(components[WINDSHIELD], SIGSTOP); //ferma invio dati dalla camera
     ecuLog("PERICOLO,MACCHINA FERMATA\n");
     speed = 0;
     kill(getppid(), SIGUSR1);
-    pause();
+    pause(); //aspetta che l'utente avvii nuovamente la macchina
 }
 void restart(int sig)
 {
@@ -39,6 +39,7 @@ void restart(int sig)
 }
 void throttleFail(int sig)
 {
+    //handler per fallimento throttle e altri errori
     for (int i = 0; i < TOTAL_COMPONENTS; i++)
     {
         kill(-(components[i]), SIGKILL);
@@ -68,7 +69,7 @@ void ecu(int mode)
     signal(SIGABRT, throttleFail);
     signal(SIGALRM, endParking);
     components[0] = crea(throttleControl);
-    components[1] = creaConModalita(mode, steerByWire);
+    components[1] = crea(steerByWire);
     components[2] = crea(brakeByWire);
     components[3] = crea(frontWindshield);
     /*ecu si mette in ascolto per gli input */
@@ -90,6 +91,7 @@ void ecu(int mode)
         speed = ecuAction(speed, command);
         close(clientD);
     }
+    //al parcheggio aspetta che brake fermi la macchina e poi avvia la procedura adatta
     char m[255];
     snprintf(m, sizeof(m), "FRENO %d\n", speed);
     int d = connectToServer(".brake");
@@ -114,6 +116,7 @@ void ecu(int mode)
     park = creaConModalita(mode, parkAssist);
     surr = creaConModalita(mode, surroundViews);
     alarm(30);
+    //aspetta dati da sensori di parcheggio per 30 secondi
     while (1)
     {
         memset(v,'\0',16);
@@ -131,7 +134,7 @@ void ecu(int mode)
         isPark = checkParking(v);
         close(clientD);
         if (isPark == 0)
-        {
+        { //riavvio procedure in caso di valori non consentiti
             kill(park, SIGKILL);
             wait((int *)SIGCHLD);
             kill(surr, SIGKILL);

@@ -23,11 +23,8 @@ static volatile int throttleFlag = 1;
 static volatile int brakeFlag = 1;
 static volatile int steerFlag = 1;
 
-void killC(int sig)
-{
-    exit(EXIT_SUCCESS);
-}
 
+/*handler di sincronizzazione*/
 void throttleflagHandle(int sig)
 {
     throttleFlag = 1 - throttleFlag;
@@ -50,7 +47,6 @@ void dangerHandler(int sig)
     return;
 }
 
-//quando sono finiti gli attuatori li mettiamo tutti insieme per facilitare la compilazione
 void throttleControl()
 {
     signal(SIGUSR1, throttleflagHandle);
@@ -74,7 +70,6 @@ void throttleControl()
     else if (child == 0)
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
-        signal(SIGUSR1, throttleflagHandle);
         sleep(1);
         /*il primo comando sarà un'accelerazione  per poter mettere in moto
         la macchina,metto a dormire un secondo il processo 
@@ -97,6 +92,7 @@ void throttleControl()
     {
         serverD = serverSocket(".throttle");
         listen(serverD, 5);
+        /*aspetta richieste accelerazione*/
         while (1)
         {
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
@@ -116,6 +112,7 @@ void throttleControl()
             kill(child, SIGUSR1);
             sleep(1); //previene problemi per accelerazioni consecutive
         }
+        exit(EXIT_FAILURE); //should never run
     }
 }
 
@@ -143,7 +140,7 @@ void brakeByWire()
     else if (child == 0)
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
-        signal(SIGUSR1, brakeFlagHandle);
+        
         for (;;)
         {
             if (brakeFlag == 1)
@@ -162,7 +159,7 @@ void brakeByWire()
     {
         serverD = serverSocket(".brake");
         listen(serverD, 5);
-        sleep(1);
+        /*aspetta richieste frenata*/
         while (1)
         {
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
@@ -182,13 +179,16 @@ void brakeByWire()
             kill(child, SIGUSR1);
             sleep(1); //previene problemi per frenate consecutive
         }
+        exit(EXIT_FAILURE);//should never run
     }
+
+
 }
 
-void steerByWire(int mode)
+void steerByWire()
 {
 
-    signal(SIGUSR1, brakeFlagHandle);
+    signal(SIGUSR1, steerflagHandle);
     char *message = malloc(10);
     FILE *f = fopen("log/steer.log", "w");
     fprintf(f, __DATE__);
@@ -200,7 +200,6 @@ void steerByWire(int mode)
     unsigned int clientLen;
     struct sockaddr_un ecuAddr;
     clientLen = sizeof(ecuAddr);
-    //int blind = creaConModalita(mode,blindSpot);
     int child = fork();
     if (child < 0)
     {
@@ -210,7 +209,6 @@ void steerByWire(int mode)
     else if (child == 0)
     { //scrive no action mentre processo padre aspetta richieste
         //il flag serve a sincronizzare i due processi come se fosse un "lock" fra thread
-        signal(SIGUSR1, steerflagHandle);
         for (;;)
         {
             if (steerFlag == 1)
@@ -228,6 +226,7 @@ void steerByWire(int mode)
     {
         serverD = serverSocket(".steer");
         listen(serverD, 5);
+        /*aspetta richieste sterzata*/
         while (1)
         {
             ECUclientD = accept(serverD, (struct sockaddr *)&ecuAddr, &clientLen);
@@ -247,5 +246,6 @@ void steerByWire(int mode)
             kill(child, SIGUSR1);
             memset(message, 0, 10);
         }
+        exit(EXIT_FAILURE); //should never run
     }
 }

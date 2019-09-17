@@ -37,15 +37,12 @@ int findAmount(char str[], int pos)
 
 void decreaseSpeed(int amount)
 {
-    FILE *f = fopen("log/brake.log", "a");
-    int len = strlen("DECREMENTO 5\n");
     while (amount != 0)
     {
 
         brakeLog("DECREMENTO 5\n");
         amount = amount - 5;
     }
-    fclose(f);
 }
 
 void brakeAction(char *message)
@@ -68,8 +65,14 @@ int ecuAction(int currSpeed, char *command)
     char *c;
     if (inc)
     {
-        change = atoi(command);
 
+        change = atoi(command);
+        if (change < 0)
+        {
+         fputs("incorrect data",stderr);
+         exit(EXIT_FAILURE);
+        }
+        
         if (change > currSpeed)
         {
             c = "INCREMENTO ";
@@ -111,8 +114,6 @@ int ecuAction(int currSpeed, char *command)
                 exit(EXIT_FAILURE);
             }
             ecuLog(command);
-            //fputs(command, log);
-            // fflush(log);
         }
     }
     fclose(log);
